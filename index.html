@@ -1,0 +1,2603 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRIG 106 Payload Generator</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- External Libraries -->
+    <script src="vendor/chart.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+			  <h1 style="margin: 0;" data-i18n="pageTitle">🚀 IRIG 106 Payload Generator</h1>
+			  <div id="languageSwitcher" style="display: flex; gap: 5px;padding:25px">
+				<button onclick="switchLanguage('ru')" id="langRu" class="lang-button active">RU</button>
+				<button onclick="switchLanguage('en')" id="langEn" class="lang-button">EN</button>
+			  </div>
+			</div>
+			<p style="color: #00ff88; text-align: center; margin-top: 5px;" data-i18n="subtitle">
+			  Генератор телеметрических данных для миссий на Марс
+			</p>
+			<p style="text-align: center; color: #888; font-size: 12px;">
+			  <span data-i18n="version">Версия</span> <span style="color: #00ff88;" id="versionNumber"></span> | 
+			  <span data-i18n="darkTheme">Dark Sci-Fi Theme (JavaScript Edition)</span>
+			</p>
+			<p style="text-align: center; color: #666; font-size: 11px;">
+			  <span data-i18n="author">Разработано</span> <strong style="color: #00aaff;">Vladimir Funtikov</strong>
+			</p>
+
+        </div>
+
+        <!-- TABS -->
+        <div class="tabs">
+		  <button class="tab-button active" onclick="switchTab('config')" data-i18n="tabConfig">Конфигурация</button>
+		  <button class="tab-button" onclick="switchTab('generation')" data-i18n="tabGeneration">Генерация</button>
+		  <button class="tab-button" onclick="switchTab('results')" data-i18n="tabResults">Результаты</button>
+		  <button class="tab-button" onclick="switchTab('download')" data-i18n="tabDownload">Скачать</button>
+		  <button class="tab-button" onclick="switchTab('help')" data-i18n="tabHelp">Справка</button>
+		</div>
+
+        <!-- CONTENT -->
+
+        <!-- ===== TAB: CONFIGURATION ===== -->
+        <div id="config" class="content active">
+            <!-- Frame Settings -->
+			<div class="settings-grid">
+			<div class="section">
+			  <div class="section-title" data-i18n="frameSettingsTitle">Настройки кадра</div>
+			  
+			  <div class="form-group">
+				<label data-i18n="labelNumFrames">Количество кадров</label>
+				<input type="number" id="numFrames" value="1000" min="10" max="50000" step="10">
+				<span style="font-size: 11px; color: #64b5f6;" data-i18n="hintNumFrames">(10 - 10000)</span>
+			  </div>
+			  
+			  <div class="form-group">
+				<label data-i18n="labelSamplingRate">Частота дискретизации (Гц)</label>
+				<input type="number" id="samplingRate" value="100" min="1" max="1000" step="10">
+				<span style="font-size: 11px; color: #64b5f6;" data-i18n="hintSamplingRate">(1 - 1000 Гц)</span>
+			  </div>
+			  
+			  <div class="form-group">
+				<label data-i18n="labelByteOrder">Порядок байтов</label>
+				<select id="byteOrder">
+				  <option value="big-endian" data-i18n="optionBigEndian">Big-Endian (MSB first)</option>
+				  <option value="little-endian" data-i18n="optionLittleEndian">Little-Endian (LSB first)</option>
+				</select>
+			  </div>
+			  
+			  <div class="form-group">
+				<label data-i18n="labelBitOrder">Порядок бит</label>
+				<select id="bitOrder">
+				  <option value="msb-first" data-i18n="optionMSBFirst">MSB-first</option>
+				  <option value="lsb-first" data-i18n="optionLSBFirst">LSB-first</option>
+				</select>
+			  </div>
+			  
+			  <div class="form-group">
+				<label data-i18n="labelOptions">Опции</label>
+				<div style="display: flex; gap: 15px; align-items: center;">
+				  <label style="display: flex; gap: 5px; align-items: center; min-width: auto;">
+					<input type="checkbox" id="enableLoopback" checked>
+					<span style="font-size: 11px;" data-i18n="optionLoopback">Loopback-тестирование</span>
+				  </label>
+				  <label style="display: flex; gap: 5px; align-items: center; min-width: auto;">
+					<input type="checkbox" id="enableDependencyCheck" checked>
+					<span style="font-size: 11px;" data-i18n="optionDependencyCheck">Проверка зависимостей</span>
+				  </label>
+				</div>
+			  </div>
+			</div>
+
+			<!-- File Settings -->
+			<div class="section">
+			  <div class="section-title" data-i18n="fileSettingsTitle">Настройки файлов</div>
+			  
+			  <div class="form-group">
+				<label data-i18n="labelBinFilename">BIN Filename</label>
+				<input type="text" id="binFilename" value="payload.bin" placeholder="payload.bin">
+			  </div>
+			  
+			  <div class="form-group">
+				<label data-i18n="labelTmatsFilename">TMATS Filename</label>
+				<input type="text" id="tmatsFilename" value="payload.tmats" placeholder="payload.tmats">
+			  </div>
+			  
+			  <div class="form-group">
+				<label data-i18n="labelLogFilename">Log Filename</label>
+				<input type="text" id="logFilename" value="report.txt" placeholder="report.txt">
+			  </div>
+			</div>
+
+			<!-- Error Injection Settings -->
+			<div class="section">
+			  <div class="section-title" data-i18n="errorInjectionTitle">Error Injection</div>
+			  
+			  <div class="form-group">
+				<label style="display: flex; align-items: center; gap: 5px;">
+				  <input type="checkbox" id="enableErrorInjection">
+				  <span data-i18n="optionEnableErrorInjection">Включить внесение ошибок</span>
+				</label>
+			  </div>
+			  
+			  <div class="form-group">
+				<label data-i18n="labelBitErrorRate">BER (Bit Error Rate)</label>
+				<input type="number" id="errorRate" value="0.0001" min="0" max="0.5" step="0.00001">
+				<span style="font-size: 11px; color: #64b5f6;" data-i18n="hintBitErrorRate">(0.0001 = 1 ошибка на 10k бит)</span>
+			  </div>
+			</div>
+			</div>
+            
+
+                        <!-- Tree View Parameters Table (NEW) -->
+                        <!-- Master-Detail Layout for Parameters -->
+            <div class="split-view-container" style="display: flex; gap: 20px; align-items: flex-start;">
+                
+                <!-- LEFT COLUMN: Tree View -->
+                <div class="section" style="flex: 1; min-width: 400px;">
+                    <div class="section-title" data-i18n="treeViewTitle">Параметры (Tree View)</div>
+                    <div class="tree-header">
+					  <div style="width: 40%;" data-i18n="treeColId">ID</div>
+					  <div style="width: 15%;" data-i18n="treeColWord">Word</div>
+					  <div style="width: 15%;" data-i18n="treeColType">Type</div>
+					  <div style="width: 10%;" data-i18n="treeColBits">Bits</div>
+					  <div style="width: 20%;" data-i18n="treeColActions">Actions</div>
+					</div>
+
+                    <div id="treeContainer" class="tree-container" style="max-height: 500px; overflow-y: auto;"><div class="tree-row" id="param-row-SYNC_PATTERN_1">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([0])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 SYNC_PATTERN_1</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        1
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">UB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                        <button class="btn" onclick="createNewParameter()" data-i18n="btnCreateNewParam">Создать параметр</button>
+					</div>
+                    </div>
+                </div><div class="tree-row" id="param-row-SYNC_PATTERN_2">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([1])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 SYNC_PATTERN_2</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        2
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">UB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([1]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-MISSION_TIME">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([2])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 MISSION_TIME</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        3
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">TIME_CODE</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        64
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([2]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-FRAME_COUNTER">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([3])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 FRAME_COUNTER</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        7
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">UB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([3]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-OBC_ALIVE_CNT">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([4])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 OBC_ALIVE_CNT</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        8
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">UB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        8
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([4]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-GUIDANCE_MODE">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([5])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 GUIDANCE_MODE</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        9
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">DISCRETE</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        8
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([5]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-TARGET_ALTITUDE">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([6])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 TARGET_ALTITUDE</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        10
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">MIL1750A</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        32
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([6]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-FLIGHT_TIME">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([7])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 FLIGHT_TIME</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        12
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">IEEE754</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        32
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([7]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-ROCKET_ALTITUDE">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([8])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 ROCKET_ALTITUDE</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        14
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">DOUBLE</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        64
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([8]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-ROCKET_VELOCITY">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([9])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 ROCKET_VELOCITY</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        18
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">IEEE754</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        32
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([9]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-DYNAMIC_PRESSURE">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([10])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 DYNAMIC_PRESSURE</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        20
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">IEEE754</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        32
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([10]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-CHAMBER_PRESSURE_1">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([11])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 CHAMBER_PRESSURE_1</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        22
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">IEEE754</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        32
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([11]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-TURBOPUMP_RPM">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([12])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 TURBOPUMP_RPM</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        24
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">UB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([12]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-SUBCOM_ID_CNT">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([13])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 SUBCOM_ID_CNT</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        25
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">UB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([13]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-SUBCOM_CONTAINER">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([14])">
+                         <span style="color: #00bcd4; font-weight: bold;">📂 SUBCOM_CONTAINER</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge container-badge">CONTAINER</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        -
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             <button class="btn btn-success" style="padding: 2px 6px; font-size: 9px;" onclick="addChildParameter([14]); event.stopPropagation();">+Child</button>
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([14]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-BATTERY_VOLTAGE_A">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([14,0])">
+                        <span class="tree-indent"></span> <span style="color: #00bcd4; font-weight: bold;">↳ BATTERY_VOLTAGE_A</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        26
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">UB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([14,0]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-BATTERY_VOLTAGE_B">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([14,1])">
+                        <span class="tree-indent"></span> <span style="color: #00bcd4; font-weight: bold;">↳ BATTERY_VOLTAGE_B</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        27
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">UB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([14,1]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-TANK_FUEL_TEMP">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([14,2])">
+                        <span class="tree-indent"></span> <span style="color: #00bcd4; font-weight: bold;">↳ TANK_FUEL_TEMP</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        28
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">SB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([14,2]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-TANK_OX_TEMP">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([14,3])">
+                        <span class="tree-indent"></span> <span style="color: #00bcd4; font-weight: bold;">↳ TANK_OX_TEMP</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        29
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">SB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([14,3]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-IMU_TEMP_X">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([14,4])">
+                        <span class="tree-indent"></span> <span style="color: #00bcd4; font-weight: bold;">↳ IMU_TEMP_X</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        30
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">IEEE754</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        32
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([14,4]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-DEEP_SUBCOM_ID_CNT">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([14,5])">
+                        <span class="tree-indent"></span> <span style="color: #00bcd4; font-weight: bold;">↳ DEEP_SUBCOM_ID_CNT</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        32
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">UB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([14,5]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-DEEP_SUBCOM_CONTAINER">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([14,6])">
+                        <span class="tree-indent"></span> <span style="color: #00bcd4; font-weight: bold;">↳ DEEP_SUBCOM_CONTAINER</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge container-badge">CONTAINER</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        -
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             <button class="btn btn-success" style="padding: 2px 6px; font-size: 9px;" onclick="addChildParameter([14,6]); event.stopPropagation();">+Child</button>
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([14,6]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-VALVE_1_POS">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([14,6,0])">
+                        <span class="tree-indent"></span><span class="tree-indent"></span> <span style="color: #00bcd4; font-weight: bold;">↳ VALVE_1_POS</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        33
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">UB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([14,6,0]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-VALVE_2_POS">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([14,6,1])">
+                        <span class="tree-indent"></span><span class="tree-indent"></span> <span style="color: #00bcd4; font-weight: bold;">↳ VALVE_2_POS</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        34
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">UB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([14,6,1]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-VALVE_3_POS">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([14,6,2])">
+                        <span class="tree-indent"></span><span class="tree-indent"></span> <span style="color: #00bcd4; font-weight: bold;">↳ VALVE_3_POS</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        35
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">UB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([14,6,2]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-VALVE_4_POS">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([14,6,3])">
+                        <span class="tree-indent"></span><span class="tree-indent"></span> <span style="color: #00bcd4; font-weight: bold;">↳ VALVE_4_POS</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        36
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">UB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([14,6,3]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-RESERVED_SLOT_6">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([14,7])">
+                        <span class="tree-indent"></span> <span style="color: #00bcd4; font-weight: bold;">↳ RESERVED_SLOT_6</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        37
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">UB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([14,7]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-CHECKSUM_SUB">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([14,8])">
+                        <span class="tree-indent"></span> <span style="color: #00bcd4; font-weight: bold;">↳ CHECKSUM_SUB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        38
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">UB</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        16
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([14,8]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-GPS_LAT">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([15])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 GPS_LAT</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        39
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">DOUBLE</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        64
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([15]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div><div class="tree-row" id="param-row-GPS_LON">
+                    <div class="tree-cell" style="width: 40%; cursor: pointer;" onclick="selectParameter([16])">
+                         <span style="color: #00bcd4; font-weight: bold;">📄 GPS_LON</span>
+                    </div>
+                    <div class="tree-cell" style="width: 15%; color: #888; font-family: monospace;">
+                        43
+                    </div>
+                    <div class="tree-cell" style="width: 15%">
+                        <span class="param-type-badge ">DOUBLE</span>
+                    </div>
+                    <div class="tree-cell" style="width: 10%; font-family: monospace; color: #ff9800;">
+                        64
+                    </div>
+                    <div class="tree-cell" style="width: 20%">
+                        <div class="param-action">
+                             
+                            <button class="btn btn-danger" style="padding: 2px 6px; font-size: 9px;" onclick="deleteParamByPath([16]); event.stopPropagation();">✕</button>
+                        </div>
+                    </div>
+                </div></div>
+                    <div style="margin-top: 10px;">
+                        <button class="btn" onclick="createNewParameter()">+ Новый корневой параметр</button>
+                    </div>
+                </div>
+
+                <!-- RIGHT COLUMN: Parameter Editor (Detail View) -->
+				<div class="section" id="paramEditorSection" style="flex: 1; background: #0a0e27; border: 1px solid #1a237e; display: none;">
+				  <div class="section-title" data-i18n="paramEditorTitle">Редактор параметра</div>
+				  <input type="hidden" id="editPath">
+				  
+				  <!-- Parameter ID -->
+				  <div class="form-group">
+					<label data-i18n="labelParamId">
+					  ID параметра
+					  <span style="color: #ff9800; cursor: help;" title="Уникальный идентификатор параметра (например, ENGINETEMP1)">ⓘ</span>
+					</label>
+					<input type="text" id="editID" placeholder="ENGINETEMP" style="font-weight: bold; color: #00bcd4;">
+				  </div>
+				  
+				  <!-- Description -->
+				  <div class="form-group">
+					<label data-i18n="labelParamDesc">
+					  Описание
+					  <span style="color: #ff9800; cursor: help;" title="Краткое описание параметра">ⓘ</span>
+					</label>
+					<input type="text" id="editDesc" placeholder="Температура двигателя">
+				  </div>
+				  
+				  <!-- Type and Bits (inline) -->
+				  <div style="display: flex; gap: 10px;">
+					<div class="form-group" style="flex: 1;">
+					  <label data-i18n="labelParamType">
+						Тип данных
+						<span style="color: #ff9800; cursor: help;" title="Тип кодирования по IRIG 106 Chapter 4">ⓘ</span>
+					  </label>
+					  <select id="editType" onchange="updateBitsFromType()">
+						<option value="UB" data-i18n="optionTypeUB">UB (Unsigned Binary)</option>
+						<option value="SB" data-i18n="optionTypeSB">SB (Signed Binary)</option>
+						<option value="IEEE754" data-i18n="optionTypeIEEE754">IEEE754 (32-bit Float)</option>
+						<option value="DOUBLE" data-i18n="optionTypeDouble">DOUBLE (64-bit Float)</option>
+						<option value="SCALEDINT" data-i18n="optionTypeScaledInt">SCALEDINT (Ax+B)</option>
+						<option value="DISCRETE" data-i18n="optionTypeDiscrete">DISCRETE (Bit flags)</option>
+						<option value="TIMECODE" data-i18n="optionTypeTimecode">TIMECODE (High/Low)</option>
+						<option value="MIL1750A" data-i18n="optionTypeMil1750a">MIL1750A (32-bit Float)</option>
+						<option value="CONTAINER" data-i18n="optionTypeContainer">CONTAINER (Subcom)</option>
+					  </select>
+					</div>
+					
+					<div class="form-group" style="flex: 0 0 100px;">
+					  <label data-i18n="labelParamBits">
+						Биты
+						<span style="color: #ff9800; cursor: help;" title="Размер в битах (1-64). Типичные: 8, 10, 12, 16, 32, 64">ⓘ</span>
+					  </label>
+					  <input type="number" id="editBits" placeholder="16" min="1" max="64" step="1">
+					</div>
+				  </div>
+				  
+				  <!-- Units -->
+				  <div class="form-group">
+					<label data-i18n="labelParamUnits">
+					  Единицы измерения
+					  <span style="color: #ff9800; cursor: help;" title="Физические единицы измерения: degC, kPa, V, A и т.д.">ⓘ</span>
+					</label>
+					<input type="text" id="editUnits" placeholder="degC">
+				  </div>
+				  
+				  <!-- Min/Max (inline) -->
+				  <div style="display: flex; gap: 10px;">
+					<div class="form-group" style="flex: 1;">
+					  <label data-i18n="labelParamMin">
+						Min
+						<span style="color: #ff9800; cursor: help;" title="Минимальное значение">ⓘ</span>
+					  </label>
+					  <input type="number" id="editMin" placeholder="0" step="any">
+					</div>
+					
+					<div class="form-group" style="flex: 1;">
+					  <label data-i18n="labelParamMax">
+						Max
+						<span style="color: #ff9800; cursor: help;" title="Максимальное значение">ⓘ</span>
+					  </label>
+					  <input type="number" id="editMax" placeholder="100" step="any">
+					</div>
+				  </div>
+				  
+				  <hr style="border: 0; border-top: 1px solid #1a237e; margin: 15px 0;">
+				  
+				  <!-- Behavior -->
+				  <div class="form-group">
+					<label data-i18n="labelParamBehavior">
+					  Поведение
+					  <span style="color: #ff9800; cursor: help;" title="Алгоритм генерации значений">ⓘ</span>
+					</label>
+					<select id="editBehavior" onchange="toggleFormulaSection()">
+					  <option value="sine" data-i18n="optionBehaviorSine">Sine (синус)</option>
+					  <option value="ramp" data-i18n="optionBehaviorRamp">Ramp (линейный)</option>
+					  <option value="random" data-i18n="optionBehaviorRandom">Random (случайный)</option>
+					  <option value="counter" data-i18n="optionBehaviorCounter">Counter (счётчик)</option>
+					  <option value="frozen" data-i18n="optionBehaviorFrozen">Frozen (константа)</option>
+					  <option value="time" data-i18n="optionBehaviorTime">Time (время)</option>
+					  <option value="formula" data-i18n="optionBehaviorFormula">Formula (JS)</option>
+					  <option value="discrete" data-i18n="optionBehaviorDiscrete">Discrete (0/1)</option>
+					  <option value="subcommutated" data-i18n="optionBehaviorSubcom">Subcommutated (Auto)</option>
+					</select>
+				  </div>
+				  
+				  <!-- Formula Section (hidden by default) -->
+				  <div id="editFormulaSection" style="display: none; background: rgba(255, 152, 0, 0.1); padding: 10px; border-left: 3px solid #ff9800; margin-bottom: 10px;">
+					<div class="form-group">
+					  <label data-i18n="labelParamFormula">
+						JavaScript формула
+						<span style="color: #ff9800; cursor: help;" title="Вычисляемое выражение. Используйте p.ID для ссылки на другие параметры или переменную t (время в секундах). Синтаксис JS.">ⓘ</span>
+					  </label>
+					  <input type="text" id="editFormula" placeholder="p.VOLTAGESUPPLY * p.CURRENT / 10">
+					  <div style="font-size: 9px; color: #64b5f6; margin-top: 3px;">
+						<code>p.VOLTAGE * 2</code>, <code>Math.sin(t)</code>, <code>p.A + p.B * 0.5</code>
+					  </div>
+					</div>
+					
+					<div class="form-group">
+					  <label data-i18n="labelParamDependsOn">
+						Зависимости (ID через запятую)
+						<span style="color: #ff9800; cursor: help;" title="Список ID параметров, от которых зависит формула (через запятую)">ⓘ</span>
+					  </label>
+					  <input type="text" id="editDependsOn" placeholder="VOLTAGESUPPLY, CURRENT">
+					</div>
+				  </div>
+				  
+				  <!-- Freq/Noise (inline) -->
+				  <div style="display: flex; gap: 10px;">
+					<div class="form-group" style="flex: 1;">
+					  <label data-i18n="labelParamFreq">
+						Частота (Hz)
+						<span style="color: #ff9800; cursor: help;" title="Частота изменения для sine, ramp. Например: 0.1 Гц означает период 10 секунд">ⓘ</span>
+					  </label>
+					  <input type="number" id="editFreq" placeholder="0.1" step="0.01" min="0">
+					</div>
+					
+					<div class="form-group" style="flex: 1;">
+					  <label data-i18n="labelParamNoise">
+						Шум (σ)
+						<span style="color: #ff9800; cursor: help;" title="Среднеквадратичное отклонение шума. 0 = без шума">ⓘ</span>
+					  </label>
+					  <input type="number" id="editNoise" placeholder="0" step="0.01" min="0">
+					</div>
+				  </div>
+				  
+				  <!-- Buttons -->
+				  <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+					<button class="btn btn-danger" onclick="cancelEdit()" data-i18n="btnCancelEdit">Отмена</button>
+					<button class="btn" onclick="saveParameterFromEditor()" data-i18n="btnSaveParam">Сохранить</button>
+				  </div>
+				</div>
+
+
+            </div>
+
+
+			<!-- Import Config -->
+            <div class="section">
+                <div class="section-title">📥 Импорт конфигурации</div>
+                <div class="form-group">
+                    <input type="file" id="configFile" accept=".json">
+                    <button class="btn" onclick="loadConfig()">Загрузить</button>
+                    <button class="btn" onclick="saveConfig()">Сохранить JSON</button>
+                </div>
+            </div>
+            
+            
+        </div>
+
+        <!-- ===== TAB: GENERATION ===== -->
+        <div id="generation" class="content">
+            <div class="section">
+                
+				<div class="section-title" data-i18n="generationStatusTitle">⚙️Статус генерации</div>
+
+                <div style="margin: 20px 0;">
+                    <div class="progress-container">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span>Прогресс генерации:</span>
+                            <span id="progressText">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%">0%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="btn-group">
+				  <button class="btn btn-success" id="generateBtn" onclick="startGeneration()" data-i18n="btnStartGeneration">Сгенерировать Payload</button>
+				  <button class="btn btn-danger" id="cancelBtn" onclick="cancelGeneration()" disabled data-i18n="btnCancelGeneration">Остановить</button>
+				</div>
+				<!-- VISUALIZATION: Byte Waterfall -->
+				<div class="section" style="margin-top: 20px; border-top: 1px solid #333; padding-top: 20px;">
+					<div class="section-title">Визуализация потока (Waterfall)</div>
+					<div style="margin-bottom: 10px; color: #888; font-size: 12px;">
+						По оси X: Байты кадра (0..N)<br>
+						По оси Y: Номер кадра (0..Total)
+					</div>
+					<div class="waterfall-container">
+						<canvas id="waterfallCanvas"></canvas>
+					</div>
+				</div>
+
+            </div>
+
+            <div class="section">
+                <div class="section-title" data-i18n="consoleOutputTitle">Консоль вывода</div>
+                <div class="console" id="console"></div>
+            </div>
+        </div>
+
+        <!-- ===== TAB: RESULTS ===== -->
+        <div id="results" class="content">
+            
+
+            <div class="section">
+                <div class="section-title" data-i18n="chartsTitle">Графики (Preview)</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; color: #00bcd4; font-size: 11px;" data-i18n="labelChartParam1">Параметр 1</label>
+						<select id="chart1Param" onchange="updateCharts()" style="width: 100%; padding: 8px; background: rgba(10, 14, 39, 0.8); border: 1px solid #1a237e; color: #e0e6ff; border-radius: 2px;">
+                        </select>
+                        <div class="chart-container">
+                            <canvas id="chart1"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; color: #00bcd4; font-size: 11px;" data-i18n="labelChartParam2">Параметр 2</label>
+						<select id="chart2Param" onchange="updateCharts()" style="width: 100%; padding: 8px; background: rgba(10, 14, 39, 0.8); border: 1px solid #1a237e; color: #e0e6ff; border-radius: 2px;">
+                        </select>
+                        <div class="chart-container">
+                            <canvas id="chart2"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+			<!-- Hex Viewer (NEW) -->
+            <div class="section">
+                <div class="section-title" data-i18n="hexViewerTitle">Просмотр Hex (Первые 200 байт)</div>
+				<div class="hex-viewer" id="hexViewer">
+                    <!-- Dynamic Hex Content -->
+                    <div style="color: #64b5f6; text-align: center; padding: 20px;">
+                        Генерация не выполнена. Нажмите "Начать генерацию".
+                    </div>
+                </div>
+            </div>
+			<div class="section">
+                <div class="section-title">📊 Сгенерированные данные (первые 20 кадров)</div>
+                <table class="data-table" id="dataTable">
+                    <thead>
+                        <tr id="dataTableHeader">
+                            <!-- Dynamic headers -->
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody">
+                        <!-- Dynamic rows -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== TAB: DOWNLOAD ===== -->
+        <div id="download" class="content">
+            <div class="section">
+                <div class="section-title" data-i18n="downloadTitle">Скачать файлы</div>
+				<p style="margin-bottom: 15px; font-size: 12px; color: #90caf9;" data-i18n="downloadDesc">
+				  Здесь можно скачать сгенерированные файлы. Кнопки станут активны после генерации.
+				</p>
+				<div class="btn-group">
+				  <button class="btn btn-success" id="downloadBinBtn" onclick="downloadBinary()" disabled data-i18n="btnDownloadBin">Скачать Payload (.BIN)</button>
+				  <button class="btn btn-success" id="downloadTmatsBtn" onclick="downloadTMATS()" disabled data-i18n="btnDownloadTmats">Скачать TMATS (.TMATS)</button>
+				  <button class="btn btn-success" id="downloadReportBtn" onclick="downloadReport()" disabled data-i18n="btnDownloadReport">Скачать Отчет (.TXT)</button>
+				  <button class="btn btn-success" id="downloadJsonBtn" onclick="downloadJSON()" disabled data-i18n="btnDownloadJson">Скачать JSON Config</button>
+				</div>
+            </div>
+
+            <div class="section">
+                <div class="section-title" data-i18n="statsTitle">Статистика генерации</div>
+
+                <div style="font-size: 11px; line-height: 2;">
+				  <div><span style="color: #64b5f6;" data-i18n="statStatus">Статус:</span> <span id="statusText">-</span></div>
+				  <div><span style="color: #64b5f6;" data-i18n="statFrames">Сгенерировано кадров:</span> <span id="framesGenerated">0</span></div>
+				  <div><span style="color: #64b5f6;" data-i18n="statBinSize">Размер .BIN:</span> <span id="binSize">0 B</span></div>
+				  <div><span style="color: #64b5f6;" data-i18n="statTmatsSize">Размер .TMATS:</span> <span id="tmatsSize">0 B</span></div>
+				  <div><span style="color: #64b5f6;" data-i18n="statReportSize">Размер отчета:</span> <span id="reportSize">0 B</span></div>
+				  <div><span style="color: #64b5f6;" data-i18n="statTime">Время генерации:</span> <span id="generationTime">0 ms</span></div>
+				</div>
+
+            </div>
+        </div>
+
+        <!-- TAB HELP -->
+		<div id="help" class="content">
+
+		  <!-- ================= HELP RU ================= -->
+		    <div id="help-ru">
+		  <!-- ========================================== -->
+		  <!-- РАЗДЕЛ 1: ВВЕДЕНИЕ -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">📘 Введение в IRIG 106 Chapter 4 Telemetry</div>
+			<div class="help-item">
+			  <h3>Что такое IRIG 106?</h3>
+			  <p>
+				<strong>IRIG 106</strong> (Inter-Range Instrumentation Group Standard 106) — это международный стандарт для записи и передачи телеметрических данных в аэрокосмической, оборонной и научной сферах.
+				<strong>Chapter 4</strong> определяет формат PCM (Pulse Code Modulation) — цифрового представления аналоговых и дискретных сигналов.
+			  </p>
+			  <p>
+				Генератор позволяет создавать бинарные пакеты данных (<code>.bin</code>), метаданные TMATS (<code>.tmats</code>) и отчёты для тестирования систем обработки телеметрии, таких как:
+			  </p>
+			  <ul style="margin-left: 20px; color: #90caf9;">
+				<li>Наземные станции приёма данных</li>
+				<li>Бортовые регистраторы (Flight Data Recorders)</li>
+				<li>Системы обработки ракетной телеметрии (Launch Vehicle Telemetry)</li>
+				<li>Космические аппараты и дроны</li>
+			  </ul>
+			</div>
+			
+			<div class="help-item">
+			  <h3>Структура Major Frame</h3>
+			  <p>
+				<strong>Major Frame</strong> — это основная единица данных, содержащая все параметры миссии.
+				Каждый кадр разбит на <strong>слова (words)</strong> фиксированной длины (обычно 8-64 бита).
+			  </p>
+			  <p>Типичная структура кадра:</p>
+			  <pre style="background: #0a0e27; padding: 10px; border-left: 3px solid #00bcd4; color: #4caf50; font-size: 11px;">
+		┌──────────────────────────────────────────────────┐
+		│ Word 1-2:  SYNC PATTERN (0xEB90, 0xEB90)         │  ← Синхронизация приёмника
+		│ Word 3:    MISSION TIME (64-bit High/Low)        │  ← Временная метка
+		│ Word 7:    FRAME COUNTER (16-bit)                │  ← Номер кадра
+		│ Word 8:    OBC ALIVE COUNTER (8-bit)             │  ← Счётчик "живучести" бортового компьютера
+		│ Word 9:    GUIDANCE MODE (8-bit discrete)        │  ← Режим наведения (0=IDLE, 1=BOOST, 2=COAST)
+		│ Word 10-11: TARGET ALTITUDE (MIL-1750A 32-bit)   │  ← Целевая высота
+		│ Word 12-13: FLIGHT TIME (IEEE754 32-bit)         │  ← Время полёта (секунды)
+		│ Word 14-17: ROCKET ALTITUDE (DOUBLE 64-bit)      │  ← Текущая высота (метры)
+		│ Word 18-19: ROCKET VELOCITY (IEEE754 32-bit)     │  ← Скорость (м/с)
+		│ Word 20-21: DYNAMIC PRESSURE (IEEE754 32-bit)    │  ← Динамическое давление (кПа)
+		│ Word 22-23: CHAMBER PRESSURE (IEEE754 32-bit)    │  ← Давление в камере сгорания (МПа)
+		│ Word 24:    TURBOPUMP RPM (UB 16-bit)            │  ← Обороты турбонасоса
+		│ Word 25:    SUBCOM ID (UB 16-bit)                │  ← Идентификатор слота субкоммутации
+		│ Word 26-38: SUBCOM CONTAINER (9 slots)           │  ← Субкоммутированные параметры
+		│ Word 39-42: GPS LATITUDE (DOUBLE 64-bit)         │  ← Широта WGS84 (градусы)
+		│ Word 43-46: GPS LONGITUDE (DOUBLE 64-bit)        │  ← Долгота WGS84 (градусы)
+		└──────────────────────────────────────────────────┘
+			  </pre>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- РАЗДЕЛ 2: ТИПЫ ДАННЫХ -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">🔢 Типы данных IRIG 106 Chapter 4</div>
+			
+			<div class="help-item">
+			  <h3>UB — Unsigned Binary (Беззнаковое целое)</h3>
+			  <p><strong>Диапазон:</strong> 0 до 2<sup>N</sup>-1 (где N — количество бит)</p>
+			  <p><strong>Применение:</strong> Счётчики, идентификаторы, напряжения (после масштабирования)</p>
+			  <p><strong>Пример 1: Счётчик кадров (16 бит)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       FRAMECOUNTER
+		Type:     UB
+		Bits:     16
+		Min:      0
+		Max:      65535
+		Behavior: counter   ← Автоматически увеличивается на 1 каждый кадр
+			  </pre>
+			  <p><strong>Пример 2: Обороты турбонасоса (16 бит)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       TURBOPUMPRPM
+		Type:     UB
+		Bits:     16
+		Units:    RPM
+		Min:      0
+		Max:      35000
+		Behavior: ramp       ← Плавное нарастание от 0 до 35000 RPM
+		Frequency: 0.05      ← Скорость изменения (5% в секунду)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>SB — Signed Binary (Знаковое целое, Two's Complement)</h3>
+			  <p><strong>Диапазон:</strong> -2<sup>N-1</sup> до 2<sup>N-1</sup>-1</p>
+			  <p><strong>Применение:</strong> Температуры, ускорения, отклонения</p>
+			  <p><strong>Пример: Температура топливного бака (16 бит)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       TANKFUELTEMP
+		Type:     SB
+		Bits:     16
+		Units:    degC
+		Min:      -50
+		Max:      150
+		Behavior: sine       ← Синусоидальная осцилляция (имитация колебаний температуры)
+		Frequency: 0.1       ← 0.1 Гц (период 10 секунд)
+		Noise:    2.5        ← Добавление случайного шума ±2.5°C
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>IEEE754 — Single Precision Float (32-bit)</h3>
+			  <p><strong>Точность:</strong> ~7 десятичных знаков</p>
+			  <p><strong>Применение:</strong> Физические величины средней точности (давления, скорости)</p>
+			  <p><strong>Пример: Динамическое давление (32 бит)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       DYNAMICPRESSURE
+		Type:     IEEE754
+		Bits:     32
+		Units:    kPa
+		Min:      0
+		Max:      80
+		Behavior: formula    ← Вычисляется по формуле
+		Formula:  0.5 * 1.225 * Math.pow(p.ROCKETVELOCITY, 2) / 1000
+		DependsOn: ROCKETVELOCITY   ← Зависит от скорости ракеты
+		</pre>
+		<p style="margin-top: 5px; color: #64b5f6; font-size: 11px;">
+		💡 <strong>Физика:</strong> Динамическое давление Q = 0.5 × ρ × V², где ρ=1.225 кг/м³ (плотность воздуха на уровне моря), V — скорость м/с.
+			  </p>
+			</div>
+
+			<div class="help-item">
+			  <h3>DOUBLE — Double Precision Float (64-bit)</h3>
+			  <p><strong>Точность:</strong> ~15-17 десятичных знаков</p>
+			  <p><strong>Применение:</strong> GPS-координаты, прецизионные измерения</p>
+			  <p><strong>Пример: GPS широта (64 бит)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       GPSLAT
+		Type:     DOUBLE
+		Bits:     64
+		Units:    deg
+		Min:      45.9
+		Max:      46.1
+		Behavior: sine       ← Имитация дрейфа координат
+		Frequency: 0.001     ← Очень медленное изменение (период 1000 секунд)
+		Noise:    0.00001    ← Микрошум для реалистичности GPS-приёмника
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>MIL1750A — MIL-STD-1750A Floating Point (32-bit)</h3>
+			  <p><strong>Формат:</strong> 1 бит знак + 8 бит экспонента + 23 бит мантисса (старая военная спецификация)</p>
+			  <p><strong>Применение:</strong> Старые бортовые системы, архивные данные</p>
+			  <p><strong>Пример: Целевая высота (32 бит)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       TARGETALTITUDE
+		Type:     MIL1750A
+		Bits:     32
+		Units:    m
+		Min:      100000
+		Max:      120000
+		Behavior: frozen     ← Константа, не изменяется (целевая орбита 110 км)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>TIMECODE — IRIG Time Code (48-bit High/Low)</h3>
+			  <p><strong>Формат:</strong> 16 бит старшие + 32 бит младшие (микросекунды с начала миссии)</p>
+			  <p><strong>Применение:</strong> Точная временная метка для синхронизации систем</p>
+			  <p><strong>Пример: Время миссии (48 бит)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       MISSIONTIME
+		Type:     TIMECODE
+		Bits:     64 (16 Hi + 32 Lo, остальное резерв)
+		Behavior: time       ← Автоматический счётчик времени в микросекундах
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>DISCRETE — Discrete States (Дискретные флаги)</h3>
+			  <p><strong>Формат:</strong> Битовое поле (каждый бит = отдельный флаг 0/1)</p>
+			  <p><strong>Применение:</strong> Статусы, режимы работы, переключатели</p>
+			  <p><strong>Пример: Режим наведения (8 бит)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       GUIDANCEMODE
+		Type:     DISCRETE
+		Bits:     8
+		Behavior: discrete   ← Случайный выбор из {0, 1, 2}
+		States:   0 = IDLE, 1 = BOOST, 2 = COAST, 3 = TERMINAL
+			  </pre>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- РАЗДЕЛ 3: ПОВЕДЕНИЯ (BEHAVIORS) -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">⚙️ Поведения параметров (Behaviors)</div>
+			
+			<div class="help-item">
+			  <h3>counter — Счётчик</h3>
+			  <p>Автоматически увеличивается на 1 каждый кадр. Начинается с <code>min</code>, при достижении <code>max</code> сбрасывается.</p>
+			  <p><strong>Применение:</strong> Счётчики кадров, heartbeat-сигналы бортового компьютера</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		OBCALIVECNT (On-Board Computer Alive Counter):
+		  Behavior: counter
+		  Min: 0, Max: 255
+		  → Кадр 0: 0, Кадр 1: 1, ..., Кадр 255: 255, Кадр 256: 0 (цикл)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>sine — Синусоида</h3>
+			  <p>Генерирует плавную периодическую кривую. Формула: <code>value = min + (max - min) * (Math.sin(2π × frequency × t) + 1) / 2</code></p>
+			  <p><strong>Параметры:</strong></p>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li><code>frequency</code> — частота в Гц (например, 0.1 Гц = период 10 секунд)</li>
+				<li><code>noise</code> — амплитуда случайного шума (0 = без шума)</li>
+			  </ul>
+			  <p><strong>Применение:</strong> Имитация вибраций, температурных колебаний, GPS-дрейфа</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		CHAMBERPRESSURE1 (Давление в камере сгорания):
+		  Type: IEEE754, Bits: 32
+		  Min: 5.0, Max: 12.0 (МПа)
+		  Behavior: sine
+		  Frequency: 0.2    ← Осцилляция с периодом 5 секунд
+		  Noise: 0.3        ← Добавление шума ±0.3 МПа
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>ramp — Линейное нарастание</h3>
+			  <p>Плавное изменение от <code>min</code> до <code>max</code> со скоростью, определяемой <code>frequency</code>.</p>
+			  <p><strong>Формула:</strong> <code>value = min + (max - min) × (t × frequency) % 1</code></p>
+			  <p><strong>Применение:</strong> Разгон двигателя, увеличение высоты, расход топлива</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ROCKETALTITUDE (Высота ракеты):
+		  Type: DOUBLE, Bits: 64
+		  Min: 0, Max: 120000 (метры)
+		  Behavior: ramp
+		  Frequency: 0.01   ← Достигнет max за 100 секунд (при 100 Гц = 10000 кадров)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>random — Случайные значения</h3>
+			  <p>Каждый кадр генерирует новое случайное число в диапазоне [min, max].</p>
+			  <p><strong>Применение:</strong> Тестирование фильтров шума, имитация сбоев сенсоров</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		SENSORNOISE:
+		  Type: SB, Bits: 16
+		  Min: -100, Max: 100
+		  Behavior: random   ← Генерация шума для отладки алгоритмов фильтрации
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>frozen — Константа</h3>
+			  <p>Не изменяется со временем. Значение фиксировано на середине диапазона: <code>value = (min + max) / 2</code></p>
+			  <p><strong>Применение:</strong> Целевые параметры миссии, конфигурационные константы</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		TARGETALTITUDE:
+		  Min: 100000, Max: 120000
+		  Behavior: frozen   → Всегда = 110000 метров (не меняется)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>time — Временная метка</h3>
+			  <p>Автоматически рассчитывает время в микросекундах с начала миссии: <code>value = frameIndex × (1000000 / samplingRate)</code></p>
+			  <p><strong>Применение:</strong> MISSIONTIME (TIMECODE)</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		MISSIONTIME:
+		  Type: TIMECODE, Bits: 64
+		  Behavior: time
+		  → Кадр 0 (t=0.000 сек): 0 мкс
+		  → Кадр 100 (t=1.000 сек при 100 Гц): 1000000 мкс
+		  → Кадр 200 (t=2.000 сек): 2000000 мкс
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>formula — Вычисляемый параметр (JavaScript)</h3>
+			  <p>Значение рассчитывается на основе других параметров через JavaScript-выражение.</p>
+			  <p><strong>Доступные переменные:</strong></p>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li><code>p.PARAMETER_ID</code> — доступ к значениям других параметров</li>
+				<li><code>t</code> — текущее время в секундах</li>
+				<li><code>Math.*</code> — математические функции (sin, cos, sqrt, pow и т.д.)</li>
+			  </ul>
+			  <p><strong>Пример 1: Динамическое давление</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		DYNAMICPRESSURE:
+		  Formula: 0.5 * 1.225 * Math.pow(p.ROCKETVELOCITY, 2) / 1000
+		  DependsOn: ROCKETVELOCITY
+		  → Если ROCKETVELOCITY = 500 м/с, то Q = 0.5 × 1.225 × 500² / 1000 = 153.125 кПа
+			  </pre>
+			  <p><strong>Пример 2: Тяга двигателя</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		THRUST:
+		  Formula: p.CHAMBERPRESSURE1 * 0.785 * Math.pow(0.5, 2) * 1e6
+		  DependsOn: CHAMBERPRESSURE1
+		  → Тяга = Давление × Площадь сопла × 10⁶ (конверсия МПа→Па)
+			  </pre>
+			  <p><strong>Пример 3: Ускорение</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ACCELERATION:
+		  Formula: (p.THRUST - p.DRAG) / p.MASS
+		  DependsOn: THRUST, DRAG, MASS
+		  → a = (F_thrust - F_drag) / m (Второй закон Ньютона)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>discrete — Дискретные состояния</h3>
+			  <p>Генерирует случайные биты (0 или 1) или выбирает из набора состояний.</p>
+			  <p><strong>Применение:</strong> Флаги статуса систем (двигатель вкл/выкл, клапаны открыты/закрыты)</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		GUIDANCEMODE:
+		  Type: DISCRETE, Bits: 8
+		  Behavior: discrete
+		  → Случайный выбор: 0 (IDLE), 1 (BOOST), 2 (COAST), 3 (TERMINAL)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>subcommutated — Субкоммутация (Round-robin)</h3>
+			  <p>Используется для контейнеров (<code>CONTAINER</code>). В каждом кадре передаётся только один из дочерних параметров по кругу.</p>
+			  <p><strong>Применение:</strong> Экономия полосы пропускания — медленно меняющиеся параметры (температуры, напряжения) передаются реже.</p>
+			  <p><strong>Пример: Контейнер с 9 слотами</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		SUBCOMCONTAINER:
+		  Type: CONTAINER
+		  Behavior: subcommutated
+		  SubParams: [BATTERYVOLTAGEA, BATTERYVOLTAGEB, TANKFUELTEMP, TANKOXTEMP, 
+					  IMUTEMPX, DEEPSUBCOMIDCNT, DEEPSUBCOMCONTAINER, RESERVEDSLOT6, CHECKSUMSUB]
+		  
+		  Кадр 0: передаётся BATTERYVOLTAGEA
+		  Кадр 1: передаётся BATTERYVOLTAGEB
+		  Кадр 2: передаётся TANKFUELTEMP
+		  ...
+		  Кадр 8: передаётся CHECKSUMSUB
+		  Кадр 9: снова BATTERYVOLTAGEA (цикл)
+			  </pre>
+			  <p style="margin-top: 5px; color: #ff9800; font-size: 11px;">
+		⚠️ <strong>Важно:</strong> Приёмник должен использовать <code>SUBCOMIDCNT</code> для определения, какой параметр передан в текущем кадре!
+			  </p>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- РАЗДЕЛ 4: СУБКОММУТАЦИЯ -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">🔄 Субкоммутация (Subcommutation)</div>
+			
+			<div class="help-item">
+			  <h3>Зачем нужна субкоммутация?</h3>
+			  <p>
+				В реальных ракетах сотни параметров, но не все нужно передавать каждый кадр. Например:
+			  </p>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li><strong>Быстрые данные (100 Гц):</strong> Ускорения, давление в камере, обороты турбонасоса</li>
+				<li><strong>Медленные данные (10 Гц):</strong> Температуры, напряжения батарей, положения клапанов</li>
+			  </ul>
+			  <p>
+				Субкоммутация позволяет упаковать медленные данные в один слот, передавая их по кругу. Это экономит ширину кадра до <strong>10 раз</strong>!
+			  </p>
+			</div>
+
+			<div class="help-item">
+			  <h3>Пример: Двухуровневая субкоммутация</h3>
+			  <p>В демо-конфигурации используется вложенная структура:</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		SUBCOMCONTAINER (Уровень 1: 9 слотов, частота обновления каждого параметра = 100Гц / 9 ≈ 11 Гц):
+		  ├─ Slot 0: BATTERYVOLTAGEA       ← Напряжение батареи A (обновляется каждые 9 кадров)
+		  ├─ Slot 1: BATTERYVOLTAGEB       ← Напряжение батареи B
+		  ├─ Slot 2: TANKFUELTEMP          ← Температура топливного бака
+		  ├─ Slot 3: TANKOXTEMP            ← Температура окислителя
+		  ├─ Slot 4: IMUTEMPX              ← Температура IMU (инерциальный блок)
+		  ├─ Slot 5: DEEPSUBCOMIDCNT       ← ID субкоммутации 2-го уровня
+		  ├─ Slot 6: DEEPSUBCOMCONTAINER   ← Вложенная субкоммутация!
+		  │   └── (Уровень 2: 4 слота, частота = 100Гц / (9×4) ≈ 2.8 Гц):
+		  │       ├─ VALVE1POS             ← Положение клапана 1
+		  │       ├─ VALVE2POS             ← Положение клапана 2
+		  │       ├─ VALVE3POS             ← Положение клапана 3
+		  │       └─ VALVE4POS             ← Положение клапана 4
+		  ├─ Slot 7: RESERVEDSLOT6         ← Резервный слот (для будущих расширений)
+		  └─ Slot 8: CHECKSUMSUB           ← Контрольная сумма субкоммутации
+			  </pre>
+			  <p style="margin-top: 5px; color: #4caf50; font-size: 11px;">
+		✅ <strong>Результат:</strong> Вместо 13 слов используется только 1 слово + ID-счётчик! Экономия: <strong>92%</strong> полосы пропускания для медленных параметров.
+			  </p>
+			</div>
+
+			<div class="help-item">
+			  <h3>Как декодировать субкоммутацию?</h3>
+			  <p>Алгоритм на стороне приёмника:</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #4caf50; font-size: 10px;">
+		1. Прочитать SUBCOMIDCNT (счётчик слота 0-8)
+		2. Прочитать значение из SUBCOMCONTAINER
+		3. Записать значение в соответствующую переменную:
+		   if (SUBCOMIDCNT == 0) → BATTERYVOLTAGEA = decoded_value;
+		   if (SUBCOMIDCNT == 1) → BATTERYVOLTAGEB = decoded_value;
+		   ...
+		   if (SUBCOMIDCNT == 6) → {
+			 read DEEPSUBCOMIDCNT;
+			 decode nested subcommutation;
+		   }
+		4. Следующий кадр: SUBCOMIDCNT++ (mod 9)
+			  </pre>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- РАЗДЕЛ 5: ЗАВИСИМОСТИ И ФОРМУЛЫ -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">🧮 Зависимости и вычисляемые параметры</div>
+			
+			<div class="help-item">
+			  <h3>Граф зависимостей</h3>
+			  <p>
+				Генератор автоматически строит граф зависимостей и вычисляет параметры в правильном порядке.
+				Если параметр <code>A</code> зависит от <code>B</code>, то <code>B</code> будет вычислен первым.
+			  </p>
+			  <p><strong>Пример из демо-конфигурации:</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		Граф зависимостей:
+		  ROCKETVELOCITY (независимый, ramp)
+			↓
+		  DYNAMICPRESSURE (зависит от ROCKETVELOCITY, formula)
+			  </pre>
+			  <p style="margin-top: 5px; color: #ff9800; font-size: 11px;">
+		⚠️ <strong>Внимание:</strong> Циклические зависимости (<code>A→B→A</code>) вызовут ошибку! Генератор автоматически проверяет граф при включении опции "Enable Dependency Check".
+			  </p>
+			</div>
+
+			<div class="help-item">
+			  <h3>Сложные формулы: Пример миссии на Марс</h3>
+			  <p>Реалистичная баллистическая траектория с учётом атмосферы:</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ALTITUDE (Высота над поверхностью):
+		  Formula: Math.max(0, p.INITIALALTITUDE + p.VELOCITY * t - 0.5 * 1.622 * t * t)
+		  DependsOn: INITIALALTITUDE, VELOCITY
+		  → Учитывает гравитацию Марса (1.622 м/с²)
+
+		ATMOSPHERICDENSITY (Плотность атмосферы Марса):
+		  Formula: 0.02 * Math.exp(-p.ALTITUDE / 11100)
+		  DependsOn: ALTITUDE
+		  → Экспоненциальная модель атмосферы (Scale Height = 11.1 км)
+
+		DRAG (Аэродинамическое сопротивление):
+		  Formula: 0.5 * p.ATMOSPHERICDENSITY * Math.pow(p.VELOCITY, 2) * 0.47 * Math.PI * Math.pow(2.5, 2)
+		  DependsOn: ATMOSPHERICDENSITY, VELOCITY
+		  → F_drag = 0.5 × ρ × V² × Cd × A (парашют диаметром 5 м, Cd=0.47)
+
+		ACCELERATION (Ускорение):
+		  Formula: (p.THRUST - p.DRAG) / p.MASS - 1.622
+		  DependsOn: THRUST, DRAG, MASS
+		  → a = (F - F_drag) / m - g_mars
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>Полиномиальное масштабирование (SCALEDINT)</h3>
+			  <p>
+				Некоторые сенсоры выдают сырые значения (Raw ADC counts), которые нужно преобразовать в физические единицы через полином:
+			  </p>
+			  <p><strong>Формула:</strong> <code>EU = A₀ + A₁×Raw + A₂×Raw² + A₃×Raw³ + ...</code></p>
+			  <p><strong>Пример: Термопара с нелинейной характеристикой</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ENGINETEMP:
+		  Type: SCALEDINT
+		  Bits: 16
+		  PolyCoeffs: [-50, 0.01, 0.000001]   ← A₀=-50, A₁=0.01, A₂=0.000001
+		  → Если Raw=5000: EU = -50 + 0.01×5000 + 0.000001×5000² = 0.01 + 25 = 25.01°C
+			  </pre>
+			  <p style="margin-top: 5px; color: #64b5f6; font-size: 11px;">
+		💡 <strong>Подсказка:</strong> Генератор сохраняет коэффициенты в TMATS для автоматической калибровки на стороне приёмника.
+			  </p>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- РАЗДЕЛ 6: TMATS МЕТАДАННЫЕ -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">📄 TMATS — Telemetry Attributes Transfer Standard</div>
+			
+			<div class="help-item">
+			  <h3>Что такое TMATS?</h3>
+			  <p>
+				<strong>TMATS</strong> — это текстовый файл с метаданными, описывающий структуру телеметрии.
+				Он позволяет приёмнику автоматически декодировать бинарные данные без ручной конфигурации.
+			  </p>
+			  <p><strong>Пример записи TMATS:</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #4caf50; font-size: 10px;">
+		G\DSI-1:IRIG 106 Chapter 4 PCM Demo;
+		P-1\DLN:ROCKETALTITUDE;
+		P-1\TF:IEEE754;
+		P-1\DPL:64;
+		P-1\MFMT-1-1:1;
+		P-1\TCLK:100;
+		P-1\MF\N:47;
+			  </pre>
+			  <p><strong>Расшифровка:</strong></p>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li><code>G\DSI-1</code> — Описание системы</li>
+				<li><code>P-1\DLN</code> — Имя параметра (Data Link Name)</li>
+				<li><code>P-1\TF</code> — Формат данных (Transfer Format)</li>
+				<li><code>P-1\DPL</code> — Длина в битах (Data Path Length)</li>
+				<li><code>P-1\MFMT-1-1</code> — Позиция в Major Frame</li>
+				<li><code>P-1\TCLK</code> — Частота дискретизации (Гц)</li>
+				<li><code>P-1\MF\N</code> — Количество слов в кадре</li>
+			  </ul>
+			</div>
+
+			<div class="help-item">
+			  <h3>Как использовать TMATS?</h3>
+			  <p>После генерации файлов <code>.bin</code> и <code>.tmats</code>:</p>
+			  <ol style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li>Загрузите <code>.tmats</code> в софт обработки (например, <strong>IRIG 106 DLL</strong>, <strong>FlightGear</strong>, <strong>ParaView</strong>)</li>
+				<li>Софт автоматически прочитает структуру данных</li>
+				<li>Откройте <code>.bin</code> — параметры будут декодированы автоматически!</li>
+			  </ol>
+			  <p style="margin-top: 5px; color: #4caf50; font-size: 11px;">
+		✅ <strong>Совместимость:</strong> Генератор создаёт TMATS согласно IRIG 106-19 (2019 edition), совместимый с IRIG 106-11, 106-15.
+			  </p>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- РАЗДЕЛ 7: LOOPBACK-ТЕСТИРОВАНИЕ -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">🔁 Loopback-тестирование целостности данных</div>
+			
+			<div class="help-item">
+			  <h3>Что проверяет Loopback?</h3>
+			  <p>
+				После генерации бинарных данных, генератор автоматически декодирует их обратно и сравнивает с исходными значениями.
+				Это гарантирует, что кодирование/декодирование работает корректно.
+			  </p>
+			  <p><strong>Проверяемые аспекты:</strong></p>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li>Точность кодирования чисел с плавающей точкой (IEEE754, DOUBLE, MIL1750A)</li>
+				<li>Правильность порядка байтов (Big-Endian / Little-Endian)</li>
+				<li>Правильность порядка битов (MSB-first / LSB-first)</li>
+				<li>Корректность декодирования субкоммутации</li>
+				<li>Обнаружение битовых ошибок (если включена инъекция ошибок)</li>
+			  </ul>
+			</div>
+
+			<div class="help-item">
+			  <h3>Интерпретация результатов Loopback</h3>
+			  <p>В консоли генерации вы увидите:</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #4caf50; font-size: 10px;">
+		✅ Loopback Test: SYNCPATTERN1 → Original: 60304, Decoded: 60304, Error: 0.000%
+		✅ Loopback Test: ROCKETALTITUDE → Original: 45678.123, Decoded: 45678.123, Error: 0.000%
+		⚠️ Loopback Test: CHAMBERPRESSURE1 → Original: 8.5, Decoded: 8.500001, Error: 0.0001% (IEEE754 rounding)
+			  </pre>
+			  <p style="margin-top: 5px; color: #64b5f6; font-size: 11px;">
+		💡 <strong>Примечание:</strong> Для <code>IEEE754</code> (32 бит) допустима погрешность до <strong>0.0001%</strong> из-за ограничений формата. Для <code>DOUBLE</code> (64 бит) точность должна быть <strong>&lt;10⁻¹⁵%</strong>.
+			  </p>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- РАЗДЕЛ 8: ПРАКТИЧЕСКИЕ ПРИМЕРЫ -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">🚀 Практические примеры миссий</div>
+			
+			<div class="help-item">
+			  <h3>Пример 1: Запуск ракеты-носителя (Launch Vehicle)</h3>
+			  <p>Конфигурация для первой ступени (burn time 120 сек):</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		Параметры:
+		- ALTITUDE: ramp (0→80 км)
+		- VELOCITY: ramp (0→2500 м/с)
+		- ACCELERATION: formula (THRUST/MASS - 9.81)
+		- CHAMBERPRESSURE: sine (имитация пульсаций)
+		- TURBOPUMPRPM: ramp (0→35000)
+		- GIMBALANGLE: sine (коррекция траектории)
+		- FUEL_REMAINING: ramp (100%→5%)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>Пример 2: Посадочный модуль на Марс (EDL)</h3>
+			  <p>Entry-Descent-Landing sequence:</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		Фаза 1 (0-60 сек): Атмосферный вход
+		- ALTITUDE: ramp (125 км → 10 км)
+		- VELOCITY: ramp (5800 м/с → 400 м/с)
+		- HEATSHIELD_TEMP: formula (динамическое давление × Mach²)
+
+		Фаза 2 (60-120 сек): Парашютный спуск
+		- PARACHUTE_STATUS: discrete (deployed=1)
+		- DESCENT_RATE: ramp (400 м/с → 80 м/с)
+
+		Фаза 3 (120-180 сек): Реактивная посадка
+		- RETROROCKET_THRUST: formula (требуемая для зависания)
+		- LANDING_RADAR: ramp (10 км → 0 м)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>Пример 3: Орбитальный спутник (Satellite Bus)</h3>
+			  <p>Стандартная телеметрия для LEO-спутника:</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		Основные параметры:
+		- GPS_LAT/LON: sine (имитация орбиты, период 90 мин)
+		- SOLAR_PANEL_VOLTAGE: sine (день/ночь цикл)
+		- BATTERY_SOC: ramp (разрядка в тени Земли)
+		- ATTITUDE_ROLL/PITCH/YAW: sine (стабилизация)
+		- STAR_TRACKER_LOCK: discrete (имитация потери фиксации на звёздах)
+		- PAYLOAD_TEMP: formula (зависит от ориентации к Солнцу)
+			  </pre>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- РАЗДЕЛ 9: ЧАСТЫЕ ОШИБКИ И РЕШЕНИЯ -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">❌ Типичные ошибки и как их исправить</div>
+			
+			<div class="help-item">
+			  <h3>Ошибка: "Circular dependency detected"</h3>
+			  <p><strong>Причина:</strong> Параметр <code>A</code> зависит от <code>B</code>, а <code>B</code> зависит от <code>A</code>.</p>
+			  <p><strong>Решение:</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #ff6b6b; font-size: 10px;">
+		Неправильно:
+		  THRUST: formula → зависит от ACCELERATION
+		  ACCELERATION: formula → зависит от THRUST  ← ЦИКЛИЧЕСКАЯ ЗАВИСИМОСТЬ!
+
+		Правильно:
+		  CHAMBERPRESSURE: sine (независимый)
+		  THRUST: formula → зависит от CHAMBERPRESSURE
+		  ACCELERATION: formula → зависит от THRUST
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>Ошибка: "Parameter ID not found in formula"</h3>
+			  <p><strong>Причина:</strong> Формула ссылается на несуществующий параметр.</p>
+			  <p><strong>Решение:</strong> Проверьте, что ID в <code>DependsOn</code> точно совпадает с ID параметра (регистр важен!).</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #ff6b6b; font-size: 10px;">
+		Неправильно:
+		  Formula: p.RocketVelocity * 2   ← "RocketVelocity" не найден!
+		  DependsOn: ROCKETVELOCITY
+
+		Правильно:
+		  Formula: p.ROCKETVELOCITY * 2   ← Точное совпадение
+		  DependsOn: ROCKETVELOCITY
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>Ошибка: "NaN detected in IEEE754 encoding"</h3>
+			  <p><strong>Причина:</strong> Деление на ноль или Math.sqrt(-1) в формуле.</p>
+			  <p><strong>Решение:</strong> Добавьте проверки в формулу:</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #4caf50; font-size: 10px;">
+		Неправильно:
+		  Formula: p.THRUST / p.MASS      ← Если MASS=0, получится NaN!
+
+		Правильно:
+		  Formula: p.MASS > 0 ? p.THRUST / p.MASS : 0
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>Проблема: Loopback показывает ошибку >1%</h3>
+			  <p><strong>Причина:</strong> Неправильный выбор типа данных или количества бит.</p>
+			  <p><strong>Решение:</strong></p>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li>Для координат GPS используйте <code>DOUBLE (64 бит)</code>, а не <code>IEEE754 (32 бит)</code></li>
+				<li>Для температур ±200°C достаточно <code>SB 16 бит</code></li>
+				<li>Для счётчиков используйте <code>UB</code>, а не <code>IEEE754</code></li>
+			  </ul>
+			</div>
+
+			<div class="help-item">
+			  <h3>Проблема: Субкоммутация декодируется неправильно</h3>
+			  <p><strong>Причина:</strong> ID-счётчик (<code>SUBCOMIDCNT</code>) не синхронизирован с контейнером.</p>
+			  <p><strong>Решение:</strong> Убедитесь, что:</p>
+			  <ol style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li>ID-счётчик имеет <code>behavior: counter</code></li>
+				<li><code>min=0</code>, <code>max=(количество слотов - 1)</code></li>
+				<li>ID-счётчик расположен <strong>перед</strong> контейнером в Major Frame</li>
+			  </ol>
+			  <pre style="background: #0a0e27; padding: 8px; color: #4caf50; font-size: 10px;">
+		Правильный порядок:
+		  Word 25: SUBCOMIDCNT (counter, 0-8)
+		  Word 26: SUBCOMCONTAINER (9 slots)
+			  </pre>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- РАЗДЕЛ 10: ДОПОЛНИТЕЛЬНЫЕ РЕСУРСЫ -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">📚 Дополнительные ресурсы</div>
+			
+			<div class="help-item">
+			  <h3>Официальная документация IRIG</h3>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li><strong>IRIG 106-19:</strong> Telemetry Standards (доступно на сайте RCC)</li>
+				<li><strong>Chapter 4:</strong> Pulse Code Modulation (PCM) Formats</li>
+				<li><strong>Chapter 9:</strong> RF/Antenna Interface Standards</li>
+				<li><strong>Appendix D:</strong> TMATS Attribute Transfer Standard</li>
+			  </ul>
+			</div>
+
+			<div class="help-item">
+			  <h3>Инструменты для работы с IRIG 106</h3>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li><strong>IRIG 106 DLL</strong> (C/C++ библиотека для декодирования)</li>
+				<li><strong>i106utils</strong> (набор CLI-утилит для конверсии)</li>
+				<li><strong>Wireshark IRIG Plugin</strong> (анализ UDP/IP телеметрии)</li>
+				<li><strong>MATLAB Aerospace Toolbox</strong> (импорт .bin файлов)</li>
+			  </ul>
+			</div>
+
+			<div class="help-item">
+			  <h3>Рекомендуемые настройки для типовых миссий</h3>
+			  <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px;">
+				<thead style="background: rgba(0,188,212,0.2);">
+				  <tr>
+					<th style="padding: 6px; text-align: left; border-bottom: 1px solid #00bcd4;">Миссия</th>
+					<th style="padding: 6px; text-align: left; border-bottom: 1px solid #00bcd4;">Sampling Rate</th>
+					<th style="padding: 6px; text-align: left; border-bottom: 1px solid #00bcd4;">Byte Order</th>
+					<th style="padding: 6px; text-align: left; border-bottom: 1px solid #00bcd4;">Bit Order</th>
+				  </tr>
+				</thead>
+				<tbody>
+				  <tr style="border-bottom: 1px solid #1a237e;">
+					<td style="padding: 6px; color: #e0e6ff;">Rocket Telemetry</td>
+					<td style="padding: 6px; color: #4caf50;">100-1000 Hz</td>
+					<td style="padding: 6px; color: #90caf9;">Big-Endian</td>
+					<td style="padding: 6px; color: #90caf9;">MSB-first</td>
+				  </tr>
+				  <tr style="border-bottom: 1px solid #1a237e;">
+					<td style="padding: 6px; color: #e0e6ff;">Satellite Bus</td>
+					<td style="padding: 6px; color: #4caf50;">1-10 Hz</td>
+					<td style="padding: 6px; color: #90caf9;">Big-Endian</td>
+					<td style="padding: 6px; color: #90caf9;">MSB-first</td>
+				  </tr>
+				  <tr style="border-bottom: 1px solid #1a237e;">
+					<td style="padding: 6px; color: #e0e6ff;">Aircraft FDR</td>
+					<td style="padding: 6px; color: #4caf50;">64-128 Hz</td>
+					<td style="padding: 6px; color: #90caf9;">Little-Endian</td>
+					<td style="padding: 6px; color: #90caf9;">LSB-first</td>
+				  </tr>
+				  <tr>
+					<td style="padding: 6px; color: #e0e6ff;">Missile Seeker</td>
+					<td style="padding: 6px; color: #4caf50;">200-400 Hz</td>
+					<td style="padding: 6px; color: #90caf9;">Big-Endian</td>
+					<td style="padding: 6px; color: #90caf9;">MSB-first</td>
+				  </tr>
+				</tbody>
+			  </table>
+			</div>
+
+			<div class="help-item">
+			  <h3>Контакты и поддержка</h3>
+			  <p style="color: #64b5f6; font-size: 11px;">
+				Генератор разработан <strong>Vladimir Funtikov</strong> для поддержки миссий на Марс 🚀<br>
+				Версия: <strong>1.0 Dark Sci-Fi Theme (JavaScript Edition)</strong><br>
+				<br>
+				<span style="color: #00bcd4;">Удачи в ваших космических миссиях!</span> 🌌
+			  </p>
+			</div>
+		  </div>
+		  </div>
+			
+			
+
+<!-- ================= HELP EN ================= -->
+		    <div id="help-en">
+		  <!-- ========================================== -->
+		  <!-- SECTION 1: INTRODUCTION -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">📘 Introduction to IRIG 106 Chapter 4 Telemetry</div>
+			<div class="help-item">
+			  <h3>What is IRIG 106?</h3>
+			  <p>
+				<strong>IRIG 106</strong> (Inter-Range Instrumentation Group Standard 106) is an international standard for recording and transmitting telemetry data in aerospace, defense, and scientific applications.
+				<strong>Chapter 4</strong> defines the PCM (Pulse Code Modulation) format — a digital representation of analog and discrete signals.
+			  </p>
+			  <p>
+				The generator allows you to create binary data packets (<code>.bin</code>), TMATS metadata (<code>.tmats</code>), and reports for testing telemetry processing systems, such as:
+			  </p>
+			  <ul style="margin-left: 20px; color: #90caf9;">
+				<li>Ground-based data reception stations</li>
+				<li>Flight Data Recorders (FDR)</li>
+				<li>Launch Vehicle Telemetry Processing Systems</li>
+				<li>Spacecraft and drones</li>
+			  </ul>
+			</div>
+			
+			<div class="help-item">
+			  <h3>Major Frame Structure</h3>
+			  <p>
+				<strong>Major Frame</strong> is the fundamental data unit containing all mission parameters.
+				Each frame is divided into <strong>words</strong> of fixed length (typically 8-64 bits).
+			  </p>
+			  <p>Typical frame structure:</p>
+			  <pre style="background: #0a0e27; padding: 10px; border-left: 3px solid #00bcd4; color: #4caf50; font-size: 11px;">
+		┌──────────────────────────────────────────────────┐
+		│ Word 1-2:  SYNC PATTERN (0xEB90, 0xEB90)         │  ← Receiver synchronization
+		│ Word 3:    MISSION TIME (64-bit High/Low)        │  ← Time stamp
+		│ Word 7:    FRAME COUNTER (16-bit)                │  ← Frame number
+		│ Word 8:    OBC ALIVE COUNTER (8-bit)             │  ← On-Board Computer heartbeat
+		│ Word 9:    GUIDANCE MODE (8-bit discrete)        │  ← Guidance mode (0=IDLE, 1=BOOST, 2=COAST)
+		│ Word 10-11: TARGET ALTITUDE (MIL-1750A 32-bit)   │  ← Target altitude
+		│ Word 12-13: FLIGHT TIME (IEEE754 32-bit)         │  ← Flight time (seconds)
+		│ Word 14-17: ROCKET ALTITUDE (DOUBLE 64-bit)      │  ← Current altitude (meters)
+		│ Word 18-19: ROCKET VELOCITY (IEEE754 32-bit)     │  ← Velocity (m/s)
+		│ Word 20-21: DYNAMIC PRESSURE (IEEE754 32-bit)    │  ← Dynamic pressure (kPa)
+		│ Word 22-23: CHAMBER PRESSURE (IEEE754 32-bit)    │  ← Chamber pressure (MPa)
+		│ Word 24:    TURBOPUMP RPM (UB 16-bit)            │  ← Turbopump RPM
+		│ Word 25:    SUBCOM ID (UB 16-bit)                │  ← Subcommutation slot ID
+		│ Word 26-38: SUBCOM CONTAINER (9 slots)           │  ← Subcommutated parameters
+		│ Word 39-42: GPS LATITUDE (DOUBLE 64-bit)         │  ← WGS84 latitude (degrees)
+		│ Word 43-46: GPS LONGITUDE (DOUBLE 64-bit)        │  ← WGS84 longitude (degrees)
+		└──────────────────────────────────────────────────┘
+			  </pre>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- SECTION 2: DATA TYPES -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">🔢 Data Types in IRIG 106 Chapter 4</div>
+			
+			<div class="help-item">
+			  <h3>UB — Unsigned Binary (Unsigned Integer)</h3>
+			  <p><strong>Range:</strong> 0 to 2<sup>N</sup>-1 (where N is the number of bits)</p>
+			  <p><strong>Applications:</strong> Counters, identifiers, voltages (after scaling)</p>
+			  <p><strong>Example 1: Frame Counter (16 bits)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       FRAMECOUNTER
+		Type:     UB
+		Bits:     16
+		Min:      0
+		Max:      65535
+		Behavior: counter   ← Auto-increments by 1 each frame
+			  </pre>
+			  <p><strong>Example 2: Turbopump RPM (16 bits)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       TURBOPUMPRPM
+		Type:     UB
+		Bits:     16
+		Units:    RPM
+		Min:      0
+		Max:      35000
+		Behavior: ramp       ← Smooth ramp from 0 to 35,000 RPM
+		Frequency: 0.05      ← Rate of change (5% per second)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>SB — Signed Binary (Signed Integer, Two's Complement)</h3>
+			  <p><strong>Range:</strong> -2<sup>N-1</sup> to 2<sup>N-1</sup>-1</p>
+			  <p><strong>Applications:</strong> Temperatures, accelerations, deviations</p>
+			  <p><strong>Example: Fuel Tank Temperature (16 bits)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       TANKFUELTEMP
+		Type:     SB
+		Bits:     16
+		Units:    °C
+		Min:      -50
+		Max:      150
+		Behavior: sine       ← Sinusoidal oscillation (simulating temperature variation)
+		Frequency: 0.1       ← 0.1 Hz (period 10 seconds)
+		Noise:    2.5        ← Random noise ±2.5°C
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>IEEE754 — Single Precision Float (32-bit)</h3>
+			  <p><strong>Precision:</strong> ~7 decimal places</p>
+			  <p><strong>Applications:</strong> Medium-precision physical quantities (pressures, velocities)</p>
+			  <p><strong>Example: Dynamic Pressure (32 bits)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       DYNAMICPRESSURE
+		Type:     IEEE754
+		Bits:     32
+		Units:    kPa
+		Min:      0
+		Max:      80
+		Behavior: formula    ← Computed from formula
+		Formula:  0.5 * 1.225 * Math.pow(p.ROCKETVELOCITY, 2) / 1000
+		DependsOn: ROCKETVELOCITY
+		</pre>
+		<p style="margin-top: 5px; color: #64b5f6; font-size: 11px;">
+		💡 <strong>Physics:</strong> Dynamic pressure Q = 0.5 × ρ × V², where ρ=1.225 kg/m³ (sea-level air density), V = velocity in m/s.
+			  </p>
+			</div>
+
+			<div class="help-item">
+			  <h3>DOUBLE — Double Precision Float (64-bit)</h3>
+			  <p><strong>Precision:</strong> ~15-17 decimal places</p>
+			  <p><strong>Applications:</strong> GPS coordinates, high-precision measurements</p>
+			  <p><strong>Example: GPS Latitude (64 bits)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       GPSLAT
+		Type:     DOUBLE
+		Bits:     64
+		Units:    deg
+		Min:      45.9
+		Max:      46.1
+		Behavior: sine       ← Simulates coordinate drift
+		Frequency: 0.001     ← Very slow change (period 1000 seconds)
+		Noise:    0.00001    ← Micro-noise for GPS receiver realism
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>MIL1750A — MIL-STD-1750A Floating Point (32-bit)</h3>
+			  <p><strong>Format:</strong> 1 sign bit + 8 exponent bits + 23 mantissa bits (legacy military specification)</p>
+			  <p><strong>Applications:</strong> Legacy on-board systems, archived data</p>
+			  <p><strong>Example: Target Altitude (32 bits)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       TARGETALTITUDE
+		Type:     MIL1750A
+		Bits:     32
+		Units:    m
+		Min:      100000
+		Max:      120000
+		Behavior: frozen     ← Constant (target orbit 110 km)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>TIMECODE — IRIG Time Code (48-bit High/Low)</h3>
+			  <p><strong>Format:</strong> 16-bit high + 32-bit low (microseconds from mission start)</p>
+			  <p><strong>Applications:</strong> Precise time stamping for system synchronization</p>
+			  <p><strong>Example: Mission Time (48 bits)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       MISSIONTIME
+		Type:     TIMECODE
+		Bits:     64 (16 Hi + 32 Lo, rest reserved)
+		Behavior: time       ← Automatic counter in microseconds
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>DISCRETE — Discrete States (Discrete Flags)</h3>
+			  <p><strong>Format:</strong> Bit field (each bit = separate flag 0/1)</p>
+			  <p><strong>Applications:</strong> Status flags, operating modes, switches</p>
+			  <p><strong>Example: Guidance Mode (8 bits)</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ID:       GUIDANCEMODE
+		Type:     DISCRETE
+		Bits:     8
+		Behavior: discrete   ← Random selection from {0, 1, 2}
+		States:   0 = IDLE, 1 = BOOST, 2 = COAST, 3 = TERMINAL
+			  </pre>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- SECTION 3: PARAMETER BEHAVIORS -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">⚙️ Parameter Behaviors (Behaviors)</div>
+			
+			<div class="help-item">
+			  <h3>counter — Counter</h3>
+			  <p>Auto-increments by 1 each frame. Starts at <code>min</code>, wraps to 0 when reaching <code>max</code>.</p>
+			  <p><strong>Applications:</strong> Frame counters, on-board computer heartbeat signals</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		OBCALIVECNT (On-Board Computer Alive Counter):
+		  Behavior: counter
+		  Min: 0, Max: 255
+		  → Frame 0: 0, Frame 1: 1, ..., Frame 255: 255, Frame 256: 0 (wraps)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>sine — Sinusoid</h3>
+			  <p>Generates smooth periodic curve. Formula: <code>value = min + (max - min) * (Math.sin(2π × frequency × t) + 1) / 2</code></p>
+			  <p><strong>Parameters:</strong></p>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li><code>frequency</code> — frequency in Hz (e.g., 0.1 Hz = 10-second period)</li>
+				<li><code>noise</code> — random noise amplitude (0 = no noise)</li>
+			  </ul>
+			  <p><strong>Applications:</strong> Vibration simulation, temperature oscillations, GPS drift</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		CHAMBERPRESSURE1 (Chamber Pressure):
+		  Type: IEEE754, Bits: 32
+		  Min: 5.0, Max: 12.0 (MPa)
+		  Behavior: sine
+		  Frequency: 0.2    ← 5-second period oscillation
+		  Noise: 0.3        ← Noise ±0.3 MPa
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>ramp — Linear Ramp</h3>
+			  <p>Smooth change from <code>min</code> to <code>max</code> at rate determined by <code>frequency</code>.</p>
+			  <p><strong>Formula:</strong> <code>value = min + (max - min) × (t × frequency) % 1</code></p>
+			  <p><strong>Applications:</strong> Engine spool-up, altitude gain, fuel consumption</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ROCKETALTITUDE (Rocket Altitude):
+		  Type: DOUBLE, Bits: 64
+		  Min: 0, Max: 120000 (meters)
+		  Behavior: ramp
+		  Frequency: 0.01   ← Reaches max in 100 seconds (at 100 Hz = 10,000 frames)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>random — Random Values</h3>
+			  <p>Each frame generates a new random number in range [min, max].</p>
+			  <p><strong>Applications:</strong> Noise filter testing, sensor fault simulation</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		SENSORNOISE:
+		  Type: SB, Bits: 16
+		  Min: -100, Max: 100
+		  Behavior: random   ← Generates noise for filter algorithm debugging
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>frozen — Constant</h3>
+			  <p>Does not change over time. Value is fixed at midpoint: <code>value = (min + max) / 2</code></p>
+			  <p><strong>Applications:</strong> Mission target parameters, configuration constants</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		TARGETALTITUDE:
+		  Min: 100000, Max: 120000
+		  Behavior: frozen   → Always = 110,000 meters (never changes)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>time — Time Stamp</h3>
+			  <p>Automatically calculates time in microseconds from mission start: <code>value = frameIndex × (1000000 / samplingRate)</code></p>
+			  <p><strong>Applications:</strong> MISSIONTIME (TIMECODE)</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		MISSIONTIME:
+		  Type: TIMECODE, Bits: 64
+		  Behavior: time
+		  → Frame 0 (t=0.000 sec): 0 µs
+		  → Frame 100 (t=1.000 sec at 100 Hz): 1,000,000 µs
+		  → Frame 200 (t=2.000 sec): 2,000,000 µs
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>formula — Computed Parameter (JavaScript)</h3>
+			  <p>Value is calculated based on other parameters via JavaScript expression.</p>
+			  <p><strong>Available variables:</strong></p>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li><code>p.PARAMETER_ID</code> — access values of other parameters</li>
+				<li><code>t</code> — current time in seconds</li>
+				<li><code>Math.*</code> — math functions (sin, cos, sqrt, pow, etc.)</li>
+			  </ul>
+			  <p><strong>Example 1: Dynamic Pressure</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		DYNAMICPRESSURE:
+		  Formula: 0.5 * 1.225 * Math.pow(p.ROCKETVELOCITY, 2) / 1000
+		  DependsOn: ROCKETVELOCITY
+		  → If ROCKETVELOCITY = 500 m/s, then Q = 0.5 × 1.225 × 500² / 1000 = 153.125 kPa
+			  </pre>
+			  <p><strong>Example 2: Engine Thrust</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		THRUST:
+		  Formula: p.CHAMBERPRESSURE1 * 0.785 * Math.pow(0.5, 2) * 1e6
+		  DependsOn: CHAMBERPRESSURE1
+		  → Thrust = Pressure × Nozzle Area × 10⁶ (MPa to Pa conversion)
+			  </pre>
+			  <p><strong>Example 3: Acceleration</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ACCELERATION:
+		  Formula: (p.THRUST - p.DRAG) / p.MASS
+		  DependsOn: THRUST, DRAG, MASS
+		  → a = (F_thrust - F_drag) / m (Newton's Second Law)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>discrete — Discrete States</h3>
+			  <p>Generates random bits (0 or 1) or selects from a set of states.</p>
+			  <p><strong>Applications:</strong> System status flags (engine on/off, valves open/closed)</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		GUIDANCEMODE:
+		  Type: DISCRETE, Bits: 8
+		  Behavior: discrete
+		  → Random selection: 0 (IDLE), 1 (BOOST), 2 (COAST), 3 (TERMINAL)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>subcommutated — Subcommutation (Round-robin)</h3>
+			  <p>Used for containers. Each frame transmits only one child parameter in rotation.</p>
+			  <p><strong>Applications:</strong> Bandwidth savings — slow-changing parameters (temperatures, voltages) transmitted less frequently.</p>
+			  <p><strong>Example: Container with 9 slots</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		SUBCOMCONTAINER:
+		  Type: CONTAINER
+		  Behavior: subcommutated
+		  SubParams: [BATTERYVOLTAGEA, BATTERYVOLTAGEB, TANKFUELTEMP, TANKOXTEMP, 
+					  IMUTEMPX, DEEPSUBCOMIDCNT, DEEPSUBCOMCONTAINER, RESERVEDSLOT6, CHECKSUMSUB]
+		  
+		  Frame 0: transmits BATTERYVOLTAGEA
+		  Frame 1: transmits BATTERYVOLTAGEB
+		  Frame 2: transmits TANKFUELTEMP
+		  ...
+		  Frame 8: transmits CHECKSUMSUB
+		  Frame 9: wraps to BATTERYVOLTAGEA (cycle)
+			  </pre>
+			  <p style="margin-top: 5px; color: #ff9800; font-size: 11px;">
+		⚠️ <strong>Important:</strong> The receiver must use <code>SUBCOMIDCNT</code> to determine which parameter is transmitted in the current frame!
+			  </p>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- SECTION 4: SUBCOMMUTATION -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">🔄 Subcommutation (Subcommutation)</div>
+			
+			<div class="help-item">
+			  <h3>Why is Subcommutation Needed?</h3>
+			  <p>
+				Real rockets have hundreds of parameters, but not all need transmitting every frame. For example:
+			  </p>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li><strong>Fast data (100 Hz):</strong> Accelerations, chamber pressure, turbopump RPM</li>
+				<li><strong>Slow data (10 Hz):</strong> Temperatures, battery voltages, valve positions</li>
+			  </ul>
+			  <p>
+				Subcommutation allows packing slow data into one slot, transmitting them in rotation. This saves frame width by up to <strong>10x</strong>!
+			  </p>
+			</div>
+
+			<div class="help-item">
+			  <h3>Example: Two-Level Subcommutation</h3>
+			  <p>The demo configuration uses nested structure:</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		SUBCOMCONTAINER (Level 1: 9 slots, update frequency = 100 Hz / 9 ≈ 11 Hz):
+		  ├─ Slot 0: BATTERYVOLTAGEA       ← Battery A voltage (updates every 9 frames)
+		  ├─ Slot 1: BATTERYVOLTAGEB       ← Battery B voltage
+		  ├─ Slot 2: TANKFUELTEMP          ← Fuel tank temperature
+		  ├─ Slot 3: TANKOXTEMP            ← Oxidizer temperature
+		  ├─ Slot 4: IMUTEMPX              ← IMU (inertial unit) temperature
+		  ├─ Slot 5: DEEPSUBCOMIDCNT       ← Level 2 subcommutation ID
+		  ├─ Slot 6: DEEPSUBCOMCONTAINER   ← Nested subcommutation!
+		  │   └── (Level 2: 4 slots, frequency = 100 Hz / (9×4) ≈ 2.8 Hz):
+		  │       ├─ VALVE1POS             ← Valve 1 position
+		  │       ├─ VALVE2POS             ← Valve 2 position
+		  │       ├─ VALVE3POS             ← Valve 3 position
+		  │       └─ VALVE4POS             ← Valve 4 position
+		  ├─ Slot 7: RESERVEDSLOT6         ← Reserved slot (for future expansion)
+		  └─ Slot 8: CHECKSUMSUB           ← Subcommutation checksum
+			  </pre>
+			  <p style="margin-top: 5px; color: #4caf50; font-size: 11px;">
+		✅ <strong>Result:</strong> Instead of 13 words, only 1 word + ID-counter is used! Savings: <strong>92%</strong> bandwidth for slow parameters.
+			  </p>
+			</div>
+
+			<div class="help-item">
+			  <h3>How to Decode Subcommutation?</h3>
+			  <p>Receiver-side algorithm:</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #4caf50; font-size: 10px;">
+		1. Read SUBCOMIDCNT (slot counter 0-8)
+		2. Read value from SUBCOMCONTAINER
+		3. Write value to corresponding variable:
+		   if (SUBCOMIDCNT == 0) → BATTERYVOLTAGEA = decoded_value;
+		   if (SUBCOMIDCNT == 1) → BATTERYVOLTAGEB = decoded_value;
+		   ...
+		   if (SUBCOMIDCNT == 6) → {
+			 read DEEPSUBCOMIDCNT;
+			 decode nested subcommutation;
+		   }
+		4. Next frame: SUBCOMIDCNT++ (mod 9)
+			  </pre>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- SECTION 5: DEPENDENCIES AND FORMULAS -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">🧮 Dependencies and Computed Parameters</div>
+			
+			<div class="help-item">
+			  <h3>Dependency Graph</h3>
+			  <p>
+				The generator automatically builds a dependency graph and computes parameters in correct order.
+				If parameter <code>A</code> depends on <code>B</code>, then <code>B</code> is computed first.
+			  </p>
+			  <p><strong>Example from demo configuration:</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		Dependency Graph:
+		  ROCKETVELOCITY (independent, ramp)
+			↓
+		  DYNAMICPRESSURE (depends on ROCKETVELOCITY, formula)
+			  </pre>
+			  <p style="margin-top: 5px; color: #ff9800; font-size: 11px;">
+		⚠️ <strong>Attention:</strong> Circular dependencies (<code>A→B→A</code>) will cause an error! The generator automatically checks the graph when "Enable Dependency Check" is enabled.
+			  </p>
+			</div>
+
+			<div class="help-item">
+			  <h3>Complex Formulas: Mars Landing Mission Example</h3>
+			  <p>Realistic ballistic trajectory considering atmosphere:</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ALTITUDE (Height above surface):
+		  Formula: Math.max(0, p.INITIALALTITUDE + p.VELOCITY * t - 0.5 * 1.622 * t * t)
+		  DependsOn: INITIALALTITUDE, VELOCITY
+		  → Accounts for Mars gravity (1.622 m/s²)
+
+		ATMOSPHERICDENSITY (Mars atmosphere density):
+		  Formula: 0.02 * Math.exp(-p.ALTITUDE / 11100)
+		  DependsOn: ALTITUDE
+		  → Exponential atmosphere model (Scale Height = 11.1 km)
+
+		DRAG (Aerodynamic drag):
+		  Formula: 0.5 * p.ATMOSPHERICDENSITY * Math.pow(p.VELOCITY, 2) * 0.47 * Math.PI * Math.pow(2.5, 2)
+		  DependsOn: ATMOSPHERICDENSITY, VELOCITY
+		  → F_drag = 0.5 × ρ × V² × Cd × A (5-meter diameter parachute, Cd=0.47)
+
+		ACCELERATION (Acceleration):
+		  Formula: (p.THRUST - p.DRAG) / p.MASS - 1.622
+		  DependsOn: THRUST, DRAG, MASS
+		  → a = (F - F_drag) / m - g_mars
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>Polynomial Scaling (SCALEDINT)</h3>
+			  <p>
+				Some sensors output raw values (Raw ADC counts) that must be converted to physical units via polynomial:
+			  </p>
+			  <p><strong>Formula:</strong> <code>EU = A₀ + A₁×Raw + A₂×Raw² + A₃×Raw³ + ...</code></p>
+			  <p><strong>Example: Thermocouple with nonlinear characteristic</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		ENGINETEMP:
+		  Type: SCALEDINT
+		  Bits: 16
+		  PolyCoeffs: [-50, 0.01, 0.000001]   ← A₀=-50, A₁=0.01, A₂=0.000001
+		  → If Raw=5000: EU = -50 + 0.01×5000 + 0.000001×5000² = 0.01 + 25 = 25.01°C
+			  </pre>
+			  <p style="margin-top: 5px; color: #64b5f6; font-size: 11px;">
+		💡 <strong>Tip:</strong> The generator saves coefficients to TMATS for automatic calibration on the receiver side.
+			  </p>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- SECTION 6: TMATS METADATA -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">📄 TMATS — Telemetry Attributes Transfer Standard</div>
+			
+			<div class="help-item">
+			  <h3>What is TMATS?</h3>
+			  <p>
+				<strong>TMATS</strong> is a text file containing telemetry metadata describing the data structure.
+				It allows the receiver to automatically decode binary data without manual configuration.
+			  </p>
+			  <p><strong>Example TMATS entry:</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #4caf50; font-size: 10px;">
+		G\DSI-1:IRIG 106 Chapter 4 PCM Demo;
+		P-1\DLN:ROCKETALTITUDE;
+		P-1\TF:IEEE754;
+		P-1\DPL:64;
+		P-1\MFMT-1-1:1;
+		P-1\TCLK:100;
+		P-1\MF\N:47;
+			  </pre>
+			  <p><strong>Explanation:</strong></p>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li><code>G\DSI-1</code> — System description</li>
+				<li><code>P-1\DLN</code> — Parameter name (Data Link Name)</li>
+				<li><code>P-1\TF</code> — Data format (Transfer Format)</li>
+				<li><code>P-1\DPL</code> — Length in bits (Data Path Length)</li>
+				<li><code>P-1\MFMT-1-1</code> — Position in Major Frame</li>
+				<li><code>P-1\TCLK</code> — Sampling frequency (Hz)</li>
+				<li><code>P-1\MF\N</code> — Number of words in frame</li>
+			  </ul>
+			</div>
+
+			<div class="help-item">
+			  <h3>How to Use TMATS?</h3>
+			  <p>After generating <code>.bin</code> and <code>.tmats</code> files:</p>
+			  <ol style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li>Load <code>.tmats</code> into processing software (e.g., <strong>IRIG 106 DLL</strong>, <strong>FlightGear</strong>, <strong>ParaView</strong>)</li>
+				<li>The software automatically reads the data structure</li>
+				<li>Open <code>.bin</code> — parameters will be decoded automatically!</li>
+			  </ol>
+			  <p style="margin-top: 5px; color: #4caf50; font-size: 11px;">
+		✅ <strong>Compatibility:</strong> The generator creates TMATS according to IRIG 106-19 (2019 edition), compatible with IRIG 106-11, 106-15.
+			  </p>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- SECTION 7: LOOPBACK TESTING -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">🔁 Loopback Testing — Data Integrity Verification</div>
+			
+			<div class="help-item">
+			  <h3>What Does Loopback Check?</h3>
+			  <p>
+				After generating binary data, the generator automatically decodes it back and compares with original values.
+				This guarantees correct encoding/decoding.
+			  </p>
+			  <p><strong>Checked aspects:</strong></p>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li>Floating-point number encoding accuracy (IEEE754, DOUBLE, MIL1750A)</li>
+				<li>Byte order correctness (Big-Endian / Little-Endian)</li>
+				<li>Bit order correctness (MSB-first / LSB-first)</li>
+				<li>Subcommutation decoding correctness</li>
+				<li>Bit error detection (if error injection enabled)</li>
+			  </ul>
+			</div>
+
+			<div class="help-item">
+			  <h3>Interpreting Loopback Results</h3>
+			  <p>In the generation console you will see:</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #4caf50; font-size: 10px;">
+		✅ Loopback Test: SYNCPATTERN1 → Original: 60304, Decoded: 60304, Error: 0.000%
+		✅ Loopback Test: ROCKETALTITUDE → Original: 45678.123, Decoded: 45678.123, Error: 0.000%
+		⚠️ Loopback Test: CHAMBERPRESSURE1 → Original: 8.5, Decoded: 8.500001, Error: 0.0001% (IEEE754 rounding)
+			  </pre>
+			  <p style="margin-top: 5px; color: #64b5f6; font-size: 11px;">
+		💡 <strong>Note:</strong> For <code>IEEE754</code> (32 bits) up to <strong>0.0001%</strong> error is acceptable due to format limitations. For <code>DOUBLE</code> (64 bits) precision should be <strong>&lt;10⁻¹⁵%</strong>.
+			  </p>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- SECTION 8: PRACTICAL EXAMPLES -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">🚀 Practical Mission Examples</div>
+			
+			<div class="help-item">
+			  <h3>Example 1: Launch Vehicle (First Stage)</h3>
+			  <p>Configuration for burn time of 120 seconds:</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		Parameters:
+		- ALTITUDE: ramp (0→80 km)
+		- VELOCITY: ramp (0→2500 m/s)
+		- ACCELERATION: formula (THRUST/MASS - 9.81)
+		- CHAMBERPRESSURE: sine (simulating pulsations)
+		- TURBOPUMPRPM: ramp (0→35000)
+		- GIMBALANGLE: sine (trajectory correction)
+		- FUEL_REMAINING: ramp (100%→5%)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>Example 2: Mars Lander (EDL)</h3>
+			  <p>Entry-Descent-Landing sequence:</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		Phase 1 (0-60 sec): Atmospheric entry
+		- ALTITUDE: ramp (125 km → 10 km)
+		- VELOCITY: ramp (5800 m/s → 400 m/s)
+		- HEATSHIELD_TEMP: formula (dynamic pressure × Mach²)
+
+		Phase 2 (60-120 sec): Parachute descent
+		- PARACHUTE_STATUS: discrete (deployed=1)
+		- DESCENT_RATE: ramp (400 m/s → 80 m/s)
+
+		Phase 3 (120-180 sec): Retro-rocket landing
+		- RETROROCKET_THRUST: formula (required for hover)
+		- LANDING_RADAR: ramp (10 km → 0 m)
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>Example 3: Orbital Satellite (Satellite Bus)</h3>
+			  <p>Standard telemetry for LEO satellite:</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
+		Main parameters:
+		- GPS_LAT/LON: sine (orbital simulation, 90-min period)
+		- SOLAR_PANEL_VOLTAGE: sine (day/night cycle)
+		- BATTERY_SOC: ramp (discharge in Earth shadow)
+		- ATTITUDE_ROLL/PITCH/YAW: sine (stabilization)
+		- STAR_TRACKER_LOCK: discrete (star lock loss simulation)
+		- PAYLOAD_TEMP: formula (depends on Sun orientation)
+			  </pre>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- SECTION 9: COMMON ERRORS AND SOLUTIONS -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">❌ Common Errors and How to Fix Them</div>
+			
+			<div class="help-item">
+			  <h3>Error: "Circular dependency detected"</h3>
+			  <p><strong>Cause:</strong> Parameter <code>A</code> depends on <code>B</code>, and <code>B</code> depends on <code>A</code>.</p>
+			  <p><strong>Solution:</strong></p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #ff6b6b; font-size: 10px;">
+		Incorrect:
+		  THRUST: formula → depends on ACCELERATION
+		  ACCELERATION: formula → depends on THRUST  ← CIRCULAR DEPENDENCY!
+
+		Correct:
+		  CHAMBERPRESSURE: sine (independent)
+		  THRUST: formula → depends on CHAMBERPRESSURE
+		  ACCELERATION: formula → depends on THRUST
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>Error: "Parameter ID not found in formula"</h3>
+			  <p><strong>Cause:</strong> Formula references a non-existent parameter.</p>
+			  <p><strong>Solution:</strong> Verify that the ID in <code>DependsOn</code> exactly matches the parameter ID (case-sensitive!).</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #ff6b6b; font-size: 10px;">
+		Incorrect:
+		  Formula: p.RocketVelocity * 2   ← "RocketVelocity" not found!
+		  DependsOn: ROCKETVELOCITY
+
+		Correct:
+		  Formula: p.ROCKETVELOCITY * 2   ← Exact match
+		  DependsOn: ROCKETVELOCITY
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>Error: "NaN detected in IEEE754 encoding"</h3>
+			  <p><strong>Cause:</strong> Division by zero or Math.sqrt(-1) in formula.</p>
+			  <p><strong>Solution:</strong> Add checks to formula:</p>
+			  <pre style="background: #0a0e27; padding: 8px; color: #4caf50; font-size: 10px;">
+		Incorrect:
+		  Formula: p.THRUST / p.MASS      ← If MASS=0, results in NaN!
+
+		Correct:
+		  Formula: p.MASS > 0 ? p.THRUST / p.MASS : 0
+			  </pre>
+			</div>
+
+			<div class="help-item">
+			  <h3>Problem: Loopback Shows Error > 1%</h3>
+			  <p><strong>Cause:</strong> Incorrect data type or bit count selection.</p>
+			  <p><strong>Solution:</strong></p>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li>For GPS coordinates use <code>DOUBLE (64 bits)</code>, not <code>IEEE754 (32 bits)</code></li>
+				<li>For temperatures ±200°C: <code>SB 16 bits</code> is sufficient</li>
+				<li>For counters: use <code>UB</code>, not <code>IEEE754</code></li>
+			  </ul>
+			</div>
+
+			<div class="help-item">
+			  <h3>Problem: Subcommutation Decoded Incorrectly</h3>
+			  <p><strong>Cause:</strong> ID-counter (<code>SUBCOMIDCNT</code>) not synchronized with container.</p>
+			  <p><strong>Solution:</strong> Ensure:</p>
+			  <ol style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li>ID-counter has <code>behavior: counter</code></li>
+				<li><code>min=0</code>, <code>max=(number of slots - 1)</code></li>
+				<li>ID-counter positioned <strong>before</strong> container in Major Frame</li>
+			  </ol>
+			  <pre style="background: #0a0e27; padding: 8px; color: #4caf50; font-size: 10px;">
+		Correct order:
+		  Word 25: SUBCOMIDCNT (counter, 0-8)
+		  Word 26: SUBCOMCONTAINER (9 slots)
+			  </pre>
+			</div>
+		  </div>
+
+		  <!-- ========================================== -->
+		  <!-- SECTION 10: ADDITIONAL RESOURCES -->
+		  <!-- ========================================== -->
+		  <div class="section">
+			<div class="section-title">📚 Additional Resources</div>
+			
+			<div class="help-item">
+			  <h3>Official IRIG Documentation</h3>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li><strong>IRIG 106-19:</strong> Telemetry Standards (available from RCC website)</li>
+				<li><strong>Chapter 4:</strong> Pulse Code Modulation (PCM) Formats</li>
+				<li><strong>Chapter 9:</strong> RF/Antenna Interface Standards</li>
+				<li><strong>Appendix D:</strong> TMATS Attribute Transfer Standard</li>
+			  </ul>
+			</div>
+
+			<div class="help-item">
+			  <h3>Tools for Working with IRIG 106</h3>
+			  <ul style="margin-left: 20px; color: #90caf9; font-size: 11px;">
+				<li><strong>IRIG 106 DLL</strong> (C/C++ library for decoding)</li>
+				<li><strong>i106utils</strong> (CLI utilities for conversion)</li>
+				<li><strong>Wireshark IRIG Plugin</strong> (UDP/IP telemetry analysis)</li>
+				<li><strong>MATLAB Aerospace Toolbox</strong> (import <code>.bin</code> files)</li>
+			  </ul>
+			</div>
+
+			<div class="help-item">
+			  <h3>Recommended Settings for Typical Missions</h3>
+			  <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px;">
+				<thead style="background: rgba(0,188,212,0.2);">
+				  <tr>
+					<th style="padding: 6px; text-align: left; border-bottom: 1px solid #00bcd4;">Mission</th>
+					<th style="padding: 6px; text-align: left; border-bottom: 1px solid #00bcd4;">Sampling Rate</th>
+					<th style="padding: 6px; text-align: left; border-bottom: 1px solid #00bcd4;">Byte Order</th>
+					<th style="padding: 6px; text-align: left; border-bottom: 1px solid #00bcd4;">Bit Order</th>
+				  </tr>
+				</thead>
+				<tbody>
+				  <tr style="border-bottom: 1px solid #1a237e;">
+					<td style="padding: 6px; color: #e0e6ff;">Rocket Telemetry</td>
+					<td style="padding: 6px; color: #4caf50;">100-1000 Hz</td>
+					<td style="padding: 6px; color: #90caf9;">Big-Endian</td>
+					<td style="padding: 6px; color: #90caf9;">MSB-first</td>
+				  </tr>
+				  <tr style="border-bottom: 1px solid #1a237e;">
+					<td style="padding: 6px; color: #e0e6ff;">Satellite Bus</td>
+					<td style="padding: 6px; color: #4caf50;">1-10 Hz</td>
+					<td style="padding: 6px; color: #90caf9;">Big-Endian</td>
+					<td style="padding: 6px; color: #90caf9;">MSB-first</td>
+				  </tr>
+				  <tr style="border-bottom: 1px solid #1a237e;">
+					<td style="padding: 6px; color: #e0e6ff;">Aircraft FDR</td>
+					<td style="padding: 6px; color: #4caf50;">64-128 Hz</td>
+					<td style="padding: 6px; color: #90caf9;">Little-Endian</td>
+					<td style="padding: 6px; color: #90caf9;">LSB-first</td>
+				  </tr>
+				  <tr>
+					<td style="padding: 6px; color: #e0e6ff;">Missile Seeker</td>
+					<td style="padding: 6px; color: #4caf50;">200-400 Hz</td>
+					<td style="padding: 6px; color: #90caf9;">Big-Endian</td>
+					<td style="padding: 6px; color: #90caf9;">MSB-first</td>
+				  </tr>
+				</tbody>
+			  </table>
+			</div>
+
+			<div class="help-item">
+			  <h3>Support and Contacts</h3>
+			  <p style="color: #64b5f6; font-size: 11px;">
+				Generator developed by <strong>Vladimir Funtikov</strong> for Mars mission support 🚀<br>
+				<strong>Version:</strong> 1.0 Dark Sci-Fi Theme (JavaScript Edition)<br>
+				<br>
+				<span style="color: #00bcd4;">Good luck with your space missions!</span> 🌌
+			  </p>
+			</div>
+		  </div>
+		  </div>
+
+
+
+
+
+
+
+
+		</div>
+
+
+    </div>
+
+    
+
+
+    <!-- JavaScript Modules (order is important!) -->
+    <script src="js/constants.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/language.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/bitwriter.js"></script>
+    <script src="js/formulas.js"></script>
+    <script src="js/encoding.js"></script>
+    <script src="js/generation.js"></script>
+    <script src="js/loopback.js"></script>
+    <script src="js/initialization.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/parameter-editor.js"></script>
+    <script src="js/modals.js"></script>
+    <script src="js/visualization.js"></script>
+    <script src="js/tmats.js"></script>
+    <script src="js/download.js"></script>
+    <script src="js/main.js"></script>
+
+</body>
+</html>
