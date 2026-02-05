@@ -2,11 +2,13 @@
 
 ## Project Overview
 
-This is a **single-file HTML/JavaScript application** for generating IRIG 106 Chapter 4 telemetry payloads. The tool creates binary telemetry data (.bin), TMATS metadata (.tmats), and configuration reports for testing telemetry processing systems in aerospace, defense, and scientific applications.
+This is a **modular HTML/JavaScript application** for generating IRIG 106 Chapter 4 telemetry payloads. The tool creates binary telemetry data (.bin), TMATS metadata (.tmats), and configuration reports for testing telemetry processing systems in aerospace, defense, and scientific applications.
 
 **Author**: Vladimir Funtikov
 **Version**: 1.0.0
 **Theme**: Dark Sci-Fi Theme (JavaScript Edition)
+
+**Architecture**: Modular (separated HTML, CSS, and JavaScript files)
 
 ---
 
@@ -14,18 +16,40 @@ This is a **single-file HTML/JavaScript application** for generating IRIG 106 Ch
 
 ```
 IRIG 106 Payload Generator/
-├── IRIG 106 Payload Generator.html    # Main application (HTML + CSS + JS embedded)
-├── index.html                            # Empty placeholder
-├── start_crush.bat                       # Batch file to run Crush with new UI
-├── UX отзыв - исполнить.md               # Russian UX feedback document
-└── IRIG 106 Payload Generator_files/
-    └── chart.min.js.Без названия          # Chart.js library
+├── index.html                              # Main application entry point
+├── css/
+│   └── styles.css                          # Application styles
+├── js/
+│   ├── constants.js                        # VERSION, TRANSLATIONS, translation helpers
+│   ├── state.js                            # Global application state
+│   ├── utils.js                            # Language utilities
+│   ├── language.js                         # Language switching
+│   ├── bitwriter.js                        # Bit-level encoding utilities
+│   ├── formulas.js                         # Value generation behaviors
+│   ├── encoding.js                         # Telemetry encoding logic
+│   ├── generation.js                       # Main generation functions
+│   ├── loopback.js                         # Loopback testing
+│   ├── initialization.js                   # Default parameters
+│   ├── ui.js                               # UI management (tabs, parameter tree)
+│   ├── parameter-editor.js                 # Parameter editing
+│   ├── modals.js                           # Modal dialogs
+│   ├── visualization.js                    # Charts, hex viewer, data tables
+│   ├── tmats.js                            # TMATS metadata generation
+│   ├── download.js                         # File download functions
+│   └── main.js                             # Entry point and event listeners
+├── vendor/
+│   └── chart.min.js                        # Chart.js library
+├── start_crush.bat                         # Batch file to run Crush with new UI
+├── REFACTORING.md                          # Refactoring documentation
+├── AGENTS.md                               # This file - development documentation
+└── UX отзыв - исполнить.md                 # Russian UX feedback document
 ```
 
 **Key Observations**:
-- All application code resides in a single HTML file (embedded CSS and JavaScript)
+- Application code is organized into modular files for better maintainability
 - No build process, package.json, or external dependencies (other than Chart.js)
-- The application is self-contained and can be run directly in a browser
+- The application runs entirely client-side in the browser
+- All functions are exposed globally on the `window` object for HTML event handlers
 - Language is a mix of English code identifiers and Russian/English UI text
 
 ---
@@ -33,7 +57,7 @@ IRIG 106 Payload Generator/
 ## How to Run
 
 ### Option 1: Direct Browser Open
-Simply open `IRIG 106 Payload Generator.html` in any modern web browser (Chrome, Firefox, Edge, Safari).
+Simply open `index.html` in any modern web browser (Chrome, Firefox, Edge, Safari).
 
 ### Option 2: Via Crush (Development Mode)
 Run the provided batch file:
@@ -45,7 +69,8 @@ This sets `CRUSH_NEW_UI=1` and launches Crush.
 ### No Build/Test Commands Required
 - No `npm install`, `make`, or build steps needed
 - No automated tests present
-- Changes to the HTML file are reflected immediately upon browser refresh
+- Changes to JavaScript or CSS files are reflected immediately upon browser refresh
+- All modules are loaded via `<script>` tags in the correct order
 
 ---
 
@@ -60,16 +85,15 @@ This section documents the Language Server Protocol (LSP) and Model Context Prot
 - **Purpose**: Get diagnostics (errors, warnings, hints) for files or the entire project
 - **Priority for this project**: HIGH
 - **Use Cases**:
-  - Checking for JavaScript syntax errors in the HTML file
-  - Identifying CSS issues (note: many CSS diagnostics are false positives due to inline CSS in HTML)
+  - Checking for JavaScript syntax errors in JS modules
+  - Identifying CSS issues in styles.css
   - Reviewing overall project health
 - **Known Limitations**:
-  - Reports many CSS errors that are expected in single-file architecture
-  - Inline CSS in `<style>` tags triggers diagnostics that don't affect functionality
+  - Some CSS diagnostics may be false positives due to custom CSS features
   - Focus on JavaScript errors and warnings rather than CSS diagnostics
 - **Recommended Workflow**:
   - Run after making changes to verify JavaScript syntax
-  - Ignore CSS diagnostics unless they reference actual JavaScript-related issues
+  - Use on individual JS files to catch syntax errors before testing in browser
 
 #### lsp_references
 - **Purpose**: Find all references/usage of a symbol (function, variable, class) in the codebase

@@ -4,7 +4,8 @@ A browser-based telemetry payload generator for IRIG 106 Chapter 4 standard. Cre
 
 ## Features
 
-- **Single-File Application** - No installation, runs directly in browser
+- **Modular Architecture** - Organized code structure for easy maintenance
+- **Browser-Based** - No installation, no build process required
 - **8 Data Types** - UB, SB, IEEE754, DOUBLE, MIL1750A, TIMECODE, DISCRETE, CONTAINER
 - **8 Behaviors** - Sine, ramp, random, counter, frozen, time, formula, discrete
 - **Subcommutation** - Round-robin container routing
@@ -16,9 +17,42 @@ A browser-based telemetry payload generator for IRIG 106 Chapter 4 standard. Cre
 
 ## Quick Start
 
-Simply open `IRIG 106 Payload Generator.html` in any modern web browser.
+Simply open `index.html` in any modern web browser.
 
 No installation or build process required.
+
+**Note**: The application has been refactored from a monolithic HTML file into a modular structure for better maintainability. All functionality remains identical.
+
+## Project Structure
+
+```
+IRIG 106 Payload Generator/
+├── index.html              # Main application entry point
+├── css/
+│   └── styles.css          # Application styles
+├── js/
+│   ├── constants.js        # VERSION, TRANSLATIONS, translation helpers
+│   ├── state.js            # Global application state
+│   ├── utils.js            # Language utilities
+│   ├── language.js         # Language switching
+│   ├── bitwriter.js        # Bit-level encoding utilities
+│   ├── formulas.js         # Value generation behaviors
+│   ├── encoding.js         # Telemetry encoding logic
+│   ├── generation.js       # Main generation functions
+│   ├── loopback.js         # Loopback testing
+│   ├── initialization.js   # Default parameters
+│   ├── ui.js               # UI management (tabs, parameter tree)
+│   ├── parameter-editor.js # Parameter editing
+│   ├── modals.js           # Modal dialogs
+│   ├── visualization.js    # Charts, hex viewer, data tables
+│   ├── tmats.js            # TMATS metadata generation
+│   ├── download.js         # File download functions
+│   └── main.js             # Entry point and event listeners
+├── vendor/
+│   └── chart.min.js        # Chart.js library
+├── REFACTORING.md          # Refactoring documentation
+└── AGENTS.md               # Development documentation
+```
 
 ## Usage
 

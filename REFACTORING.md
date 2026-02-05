@@ -299,36 +299,36 @@ IRIG 106 Payload Generator/
 
 ### Этап 2: Извлечение CSS
 - [x] Извлечь строки 8-634 в `css/styles.css`
-- [ ] Убрать теги `<style>` и `</style>`
-- [ ] Проверить, что CSS корректен
+- [x] Убрать теги `<style>` и `</style>`
+- [x] Проверить, что CSS корректен
 
 ### Этап 3: Извлечение JS модулей
 - [x] Извлечь `js/constants.js` (lines 3204-3670)
-- [ ] Извлечь `js/state.js` (lines 3743-3760)
-- [ ] Извлечь `js/initialization.js` (lines 3765-3930)
-- [ ] Извлечь `js/formulas.js` (найти точные границы)
-- [ ] Извлечь `js/ui.js` (lines 3932-4074)
-- [ ] Извлечь `js/parameter-editor.js` (lines 4075-4313)
-- [ ] Извлечь `js/bitwriter.js` (lines 4513-4573)
-- [ ] Извлечь `js/encoding.js` (lines 4574-4715)
-- [ ] Извлечь `js/generation.js` (lines 4437-4715, excluding BitWriter)
-- [ ] Извлечь `js/loopback.js` (найти точные границы)
-- [ ] Извлечь `js/visualization.js` (lines 4472-5152)
-- [ ] Извлечь `js/tmats.js` (lines 5232-5442)
-- [ ] Извлечь `js/download.js` (найти точные границы)
-- [ ] Извлечь `js/main.js` (create entry point)
+- [x] Извлечь `js/state.js` (lines 3743-3760)
+- [x] Извлечь `js/initialization.js` (lines 3765-3930)
+- [x] Извлечь `js/formulas.js` (найти точные границы)
+- [x] Извлечь `js/ui.js` (lines 3932-4074)
+- [x] Извлечь `js/parameter-editor.js` (lines 4075-4313)
+- [x] Извлечь `js/bitwriter.js` (lines 4513-4573)
+- [x] Извлечь `js/encoding.js` (lines 4574-4715)
+- [x] Извлечь `js/generation.js` (lines 4437-4715, excluding BitWriter)
+- [x] Извлечь `js/loopback.js` (найти точные границы)
+- [x] Извлечь `js/visualization.js` (lines 4472-5152)
+- [x] Извлечь `js/tmats.js` (lines 5232-5442)
+- [x] Извлечь `js/download.js` (найти точные границы)
+- [x] Извлечь `js/main.js` (create entry point)
 
 ### Этап 4: Создание нового HTML
-- [ ] Создать `index.html` на основе старого (lines 635-3203)
-- [ ] Убрать весь JavaScript из `<script>` тега
-- [ ] Добавить `<link rel="stylesheet" href="css/styles.css">` в `<head>`
-- [ ] Добавить `<script>` теги для всех JS модулей в правильном порядке
-- [ ] Переместить chart.min.js в `vendor/`
+- [x] Создать `index.html` на основе старого (lines 635-3203)
+- [x] Убрать весь JavaScript из `<script>` тега
+- [x] Добавить `<link rel="stylesheet" href="css/styles.css">` в `<head>`
+- [x] Добавить `<script>` теги для всех JS модулей в правильном порядке
+- [x] Переместить chart.min.js в `vendor/`
 
 ### Этап 5: Исправление зависимостей
-- [ ] Проверить, что все модули имеют доступ к глобальным переменным
-- [ ] Добавить `window.appState`, `window.TRANSLATIONS`, etc. где нужно
-- [ ] Убедиться, что функции вызываются в правильном порядке
+- [x] Проверить, что все модули имеют доступ к глобальным переменным
+- [x] Добавить `window.appState`, `window.TRANSLATIONS`, etc. где нужно
+- [x] Убедиться, что функции вызываются в правильном порядке
 
 ### Этап 6: Тестирование
 - [ ] Открыть `index.html` в браузере
@@ -349,4 +349,4 @@ IRIG 106 Payload Generator/
 
 - **Начало:** 2026-02-01
 - **Прогнозируемое завершение:** ~30-45 минут
-- **Текущий статус:** Этап 2 завершен, начинаем Этап 3
+- **Текущий статус:** Этап 5 завершен, все синтаксические ошибки исправлены (0 ошибок)

@@ -119,6 +119,3 @@
             console.appendChild(line);
             console.scrollTop = console.scrollHeight;
         }
-
-        // ===== GENERATION =====
-        function startGeneration() {
