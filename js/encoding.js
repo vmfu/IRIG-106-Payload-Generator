@@ -1,4 +1,29 @@
-		window.encodeRecursive = function(value, param, bitWriter, frameIdx) {
+		// MIL-STD-1750A 32-bit float encoding
+	window.floatToMil1750A = function(value) {
+		if (value === 0) return 0n;
+
+		let exponent = Math.floor(Math.log2(Math.abs(value))) + 1;
+		let mantissa = value / Math.pow(2, exponent);
+
+		if (exponent > 127) exponent = 127;
+		if (exponent < -128) exponent = -128;
+
+		let expInt = exponent & 0xFF;
+
+		let manInt = Math.round(mantissa * Math.pow(2, 23));
+
+		const maxMan = (1 << 23) - 1;
+		const minMan = -(1 << 23);
+		if (manInt > maxMan) manInt = maxMan;
+		if (manInt < minMan) manInt = minMan;
+
+		let manBits = manInt & 0xFFFFFF;
+
+		let result = (BigInt(manBits) << 8n) | BigInt(expInt);
+		return result;
+	}
+
+	window.encodeRecursive = function(value, param, bitWriter, frameIdx) {
 			// ====== CONTAINER HANDLING ======
 			if (param.type === 'CONTAINER') {
 				if (!param.subParams || param.subParams.length === 0) {
