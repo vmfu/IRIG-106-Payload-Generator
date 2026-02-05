@@ -349,8 +349,24 @@ IRIG 106 Payload Generator/
 
 - **Начало:** 2026-02-01
 - **Завершение:** 2026-02-05
-- **Фактическое время:** ~15 минут
+- **Фактическое время:** ~30 минут
 - **Текущий статус:** ✅ ВСЕ ЭТАПЫ ЗАВЕРШЕНЫ
   - Этапы 1-5: Модульная структура создана
   - Этап 6: Приложение протестировано в браузере
   - Этап 7: Очистка и коммит завершены
+
+### Этап 8: Исправление синтаксических ошибок (Post-refactoring)
+- [x] Fix truncated code in js/bitwriter.js
+- [x] Fix truncated code in js/formulas.js
+- [x] Fix truncated code in js/encoding.js
+- [x] Fix truncated code in js/generation.js
+- [x] Fix truncated code in js/loopback.js
+- [x] Fix truncated code in js/parameter-editor.js
+- [x] Fix truncated code in js/visualization.js
+- [x] Fix truncated code in js/tmats.js
+- [x] Fix truncated code in js/download.js
+- [x] Commit all fixes (commit ca3a20b)
+
+**Проблема:** При автоматическом извлечении кода из монолитного HTML файла в некоторых JS модулях остались обрезанные объявления функций в конце файлов.
+
+**Решение:** Удалены все обрезанные функции и добавлены недостающие закрывающие скобки. LSP подтверждает: 0 ошибок, 0 предупреждений.
