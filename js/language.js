@@ -2,15 +2,6 @@
 // LANGUAGE - Language and UI Navigation
 // ============================================================================
 
-window.switchLanguage = function(lang) {
-    updateLanguage(lang);
-
-    document.querySelectorAll('.lang-button').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    document.getElementById('lang' + lang.charAt(0).toUpperCase() + lang.slice(1)).classList.add('active');
-}
-
 window.updateLanguage = function(lang) {
     currentLanguage = lang;
 
@@ -52,6 +43,15 @@ window.updateLanguage = function(lang) {
             helpEn.style.display = 'block';
         }
     }
+}
+
+window.switchLanguage = function(lang) {
+    updateLanguage(lang);
+
+    document.querySelectorAll('.lang-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.getElementById('lang' + lang.charAt(0).toUpperCase() + lang.slice(1)).classList.add('active');
 }
 
 window.initLanguage = function() {

@@ -28,6 +28,41 @@
             downloadFile(blob, 'irig106_config.json');
         }
 
+        window.saveConfig = function() {
+            downloadJSON();
+        }
+
+        window.loadConfig = function() {
+            const fileInput = document.getElementById('configFile');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Пожалуйста, выберите файл JSON для загрузки');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const config = JSON.parse(e.target.result);
+
+                    document.getElementById('numFrames').value = config.numFrames || 1000;
+                    document.getElementById('samplingRate').value = config.samplingRate || 100;
+                    document.getElementById('byteOrder').value = config.byteOrder || 'big-endian';
+                    document.getElementById('bitOrder').value = config.bitOrder || 'msb-first';
+
+                    if (config.parameters && Array.isArray(config.parameters)) {
+                        appState.parameters = config.parameters;
+                        updateParametersTable();
+                    }
+
+                    alert('Конфигурация успешно загружена!');
+                } catch (error) {
+                    alert('Ошибка при загрузке конфигурации: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
         window.downloadFile = function(blob, filename) {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');

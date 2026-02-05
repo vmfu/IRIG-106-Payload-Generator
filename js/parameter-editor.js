@@ -38,8 +38,7 @@
 
 
         // Создание нового корневого параметра
-        // Создание нового корневого параметра с дефолтными значениями
-        function createNewParameter() {
+        window.createNewParameter = function() {
             const timestamp = Date.now().toString(36).toUpperCase();
             const newParam = {
                 id: 'PARAM_' + timestamp,
@@ -108,7 +107,7 @@
 
 
         // Добавление ребенка в контейнер
-        function addChildParameter(parentPath) {
+        window.addChildParameter = function(parentPath) {
             // Находим родителя
             let parent = appState.parameters[parentPath[0]];
             for(let i=1; i<parentPath.length; i++) {
@@ -178,7 +177,7 @@
         }
 
 
-        function cancelEdit() {
+        window.cancelEdit = function() {
             document.getElementById('paramEditorSection').style.display = 'none';
             document.getElementById('editPath').value = '';
             updateParametersTable(); // Снять выделение
@@ -216,7 +215,7 @@
 
         
         // Helper to delete from nested structure
-        function deleteParamByPath(path) {
+        window.deleteParamByPath = function(path) {
             if (!confirm('Удалить параметр?')) return;
             
             let target = appState.parameters;
