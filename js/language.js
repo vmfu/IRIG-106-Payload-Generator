@@ -74,12 +74,16 @@ window.initLanguage = function() {
     }
 }
 
-function switchTab(tabName) {
+window.switchTab = function(tabName) {
     document.querySelectorAll('.content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
 
     document.getElementById(tabName).classList.add('active');
-    event.target.classList.add('active');
+
+    const activeBtn = document.querySelector(`.tab-button[onclick="switchTab('${tabName}')"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
 
     if (tabName === 'results' && appState.generatedData.length > 0) {
         updateDataTable();
