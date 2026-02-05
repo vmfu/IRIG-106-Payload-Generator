@@ -57,6 +57,3 @@
                 return Math.ceil(this.bitPosition / 8);
             }
         }
-		
-		// ===encodeRecursive отвечает за правильную упаковку битов в зависимости от активного типа данных (важно для контейнеров)
-		function encodeRecursive(value, param, bitWriter, frameIdx) {

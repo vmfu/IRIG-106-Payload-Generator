@@ -479,5 +479,3 @@
             document.getElementById('generateBtn').disabled = false;
             document.getElementById('cancelBtn').disabled = true;
         }
-
-		function generateValue(param, t, frameIdx, context) {

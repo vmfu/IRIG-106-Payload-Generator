@@ -71,7 +71,3 @@
 
             container.innerHTML = html;
         }
-
-		
-        // ===== BIT WRITER CLASS =====
-        class BitWriter {

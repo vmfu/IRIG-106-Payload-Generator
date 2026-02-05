@@ -235,6 +235,3 @@
              // For simplicity, just alert in this snippet or implementing full modal logic later
              alert("Добавление в контейнер будет реализовано в следующем патче UI модального окна");
         }
-
-
-        function deleteParameter(idx) {

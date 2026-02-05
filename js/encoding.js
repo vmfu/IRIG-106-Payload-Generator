@@ -138,6 +138,3 @@
             }
             consoleLog(`[ERROR INJECTION] Повреждено ${errorCount} бит из ${totalBits})`, 'warning');
         }
-
-        // ===== PAYLOAD GENERATION WITH PROPER BIT PACKING =====
-        function generatePayload(numFrames, samplingRate) {

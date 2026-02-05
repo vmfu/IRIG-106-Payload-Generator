@@ -53,4 +53,3 @@
             });
             return report;
         }
-		function performDeepLoopbackTest() {
