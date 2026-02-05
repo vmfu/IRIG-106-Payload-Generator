@@ -753,7 +753,7 @@ Based on code structure and UX feedback:
 ## Contact & Credits
 
 **Developed by**: Vladimir Funtikov
-**Purpose**: Telemetry data generator for Mars missions
+**Purpose**: Educational IRIG 106 telemetry generator for learning and training
 **Theme**: Dark Sci-Fi Theme (JavaScript Edition)
 **Version**: 1.0.0
 

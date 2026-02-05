@@ -23,7 +23,7 @@
 			  </div>
 			</div>
 			<p style="color: #00ff88; text-align: center; margin-top: 5px;" data-i18n="subtitle">
-			  Генератор телеметрических данных для миссий на Марс
+			  Генератор телеметрических данных для учебных целей
 			</p>
 			<p style="text-align: center; color: #888; font-size: 12px;">
 			  <span data-i18n="version">Версия</span> <span style="color: #00ff88;" id="versionNumber"></span> | 
@@ -1450,15 +1450,15 @@
 			</div>
 
 			<div class="help-item">
-			  <h3>Сложные формулы: Пример миссии на Марс</h3>
+			  <h3>Сложные формулы: Пример баллистики</h3>
 			  <p>Реалистичная баллистическая траектория с учётом атмосферы:</p>
 			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
 		ALTITUDE (Высота над поверхностью):
 		  Formula: Math.max(0, p.INITIALALTITUDE + p.VELOCITY * t - 0.5 * 1.622 * t * t)
 		  DependsOn: INITIALALTITUDE, VELOCITY
-		  → Учитывает гравитацию Марса (1.622 м/с²)
+		  → Учитывает гравитацию планеты (1.622 м/с²)
 
-		ATMOSPHERICDENSITY (Плотность атмосферы Марса):
+		ATMOSPHERICDENSITY (Плотность атмосферы планеты):
 		  Formula: 0.02 * Math.exp(-p.ALTITUDE / 11100)
 		  DependsOn: ALTITUDE
 		  → Экспоненциальная модель атмосферы (Scale Height = 11.1 км)
@@ -1601,7 +1601,7 @@
 			</div>
 
 			<div class="help-item">
-			  <h3>Пример 2: Посадочный модуль на Марс (EDL)</h3>
+			  <h3>Пример 2: Посадочный модуль (EDL)</h3>
 			  <p>Entry-Descent-Landing sequence:</p>
 			  <pre style="background: #0a0e27; padding: 8px; color: #e0e6ff; font-size: 10px;">
 		Фаза 1 (0-60 сек): Атмосферный вход
@@ -1781,10 +1781,10 @@
 			<div class="help-item">
 			  <h3>Контакты и поддержка</h3>
 			  <p style="color: #64b5f6; font-size: 11px;">
-				Генератор разработан <strong>Vladimir Funtikov</strong> для поддержки миссий на Марс 🚀<br>
+				Генератор разработан <strong>Vladimir Funtikov</strong> для учебных целей 🎓<br>
 				Версия: <strong>1.0 Dark Sci-Fi Theme (JavaScript Edition)</strong><br>
 				<br>
-				<span style="color: #00bcd4;">Удачи в ваших космических миссиях!</span> 🌌
+				<span style="color: #00bcd4;">Удачи в изучении телеметрии!</span> 📊
 			  </p>
 			</div>
 		  </div>
@@ -2514,7 +2514,7 @@
 			</div>
 
 			<div class="help-item">
-			  <h3>Recommended Settings for Typical Missions</h3>
+			  <h3>Recommended Settings for Typical Applications</h3>
 			  <table style="width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px;">
 				<thead style="background: rgba(0,188,212,0.2);">
 				  <tr>

@@ -8,7 +8,7 @@
 		  ru: {
 			// Header
 			pageTitle: "🚀 IRIG 106 Payload Generator",
-			subtitle: "Генератор телеметрических данных для миссий на Марс",
+			subtitle: "Учебный генератор телеметрических данных IRIG 106",
 			version: "Версия",
 			darkTheme: "Dark Sci-Fi Theme (JavaScript Edition)",
 			author: "Разработано",
@@ -200,7 +200,7 @@
 			// Use Cases
 			useCasesTitle: "Примеры использования",
 			rocketTitle: "🚀 Ракета-носитель (первая ступень)",
-			marsTitle: "🔴 Марсианский посадочный модуль",
+			marsTitle: "🔴 Пример: Посадочный модуль",
 			satelliteTitle: "🛰️ Спутник на низкой орбите",
 			
 			// Troubleshooting
@@ -214,7 +214,7 @@
 			// Footer
 			footerTitle: "О генераторе",
 			developedBy: "Генератор разработан",
-			forMissions: "для поддержки миссий на Марс 🚀",
+			forMissions: "для учебных целей 🎓",
 			goodLuck: "Удачи в ваших космических миссиях! 🌌",
 			
 			// Console Messages
@@ -235,7 +235,7 @@
 		  en: {
 			// Header
 			pageTitle: "🚀 IRIG 106 Payload Generator",
-			subtitle: "Telemetry Data Generator for Mars Missions",
+			subtitle: "Educational IRIG 106 Telemetry Generator",
 			version: "Version",
 			darkTheme: "Dark Sci-Fi Theme (JavaScript Edition)",
 			author: "Developed by",
@@ -441,7 +441,7 @@
 			// Footer
 			footerTitle: "About Generator",
 			developedBy: "Generator developed by",
-			forMissions: "to support Mars missions 🚀",
+			forMissions: "for educational purposes 🎓",
 			goodLuck: "Good luck with your space missions! 🌌",
 			
 			// Console Messages
